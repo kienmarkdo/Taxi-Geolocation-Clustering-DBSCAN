@@ -8,4 +8,4 @@ Clustering is done with the DBSCAN algorithm which detects spatiotemporal taxi t
 The project is implemented in four different programming paradigms: objected-oriented, concurrent, logical, and functional programming in Java, Golang, Prolog, and Scheme, respectively. UML diagrams and detailed documentation are also included in the development of this project.
 
 # Dataset
-The data is contained in a CSV file, with each line corresponding to a trip record and the columns representing the relevant attributes of each trip. Since we want to identify the best waiting areas, we are interested in the starting points. As such, the dataset includes the GPS coordinates of the start and end point for each taxi trip.
+The dataset is taken from NYC's 2009 taxi database that recorded taxi trips in the span of 1 hour. The dataset is contained in a CSV file, with each line corresponding to a trip record and the columns representing the relevant attributes of each trip. Since we want to identify the best waiting areas, we are interested in the starting points. As such, the dataset includes the GPS coordinates of the start and end point for each taxi trip.
