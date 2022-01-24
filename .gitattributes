@@ -1,0 +1,2 @@
+* linguist-vendored
+dist/*.java linguist-vendored=false
