@@ -8,6 +8,6 @@ import java.util.List;
 public class Cluster {
 
     private double coordinate;
-    private List<Double> surroundingCoords;
+    private List<GPScoord> surroundingCoords;
     private int numOfSurroundingCoords;
 }
