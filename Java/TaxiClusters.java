@@ -1,4 +1,5 @@
 import java.io.*;
+import java.sql.SQLOutput;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -63,6 +64,9 @@ public class TaxiClusters {
     static int END_LON = 12;
     static int END_LAT = 13;
 
+    static int PICKUP_DATETIME = 4;
+    static int TRIP_DISTANCE = 7;
+
     // DBSCAN attributes
     static double EPS = 0.01;
     static int MIN_PTS = 5;
@@ -70,13 +74,36 @@ public class TaxiClusters {
 
     public static void main(String[] args) {
         readDataIntoList();
-        //printListData();
+        printListData();
 
-        GPScoord firstCoord = new GPScoord(
-                Double.parseDouble(CSV_DATA_LIST.get(1).get(START_LON)),
-                Double.parseDouble(CSV_DATA_LIST.get(1).get(START_LAT))
+        System.out.println("======================");
+
+        GPScoord firstPickUpCoord = new GPScoord(
+                Double.parseDouble(CSV_DATA_LIST.get(1).get(START_LAT)),
+                Double.parseDouble(CSV_DATA_LIST.get(1).get(START_LON))
         );
-        firstCoord.printCoordinate();
+        System.out.println("First pick up coord");
+        firstPickUpCoord.printCoordinate();
+
+        System.out.println("======================");
+
+        GPScoord firstDropoffCoord = new GPScoord(
+                Double.parseDouble(CSV_DATA_LIST.get(1).get(END_LAT)),
+                Double.parseDouble(CSV_DATA_LIST.get(1).get(END_LON))
+        );
+        System.out.println("First drop off coord");
+        firstDropoffCoord.printCoordinate();
+
+        System.out.println("======================");
+
+        TripRecord firstTrip = new TripRecord(
+                CSV_DATA_LIST.get(1).get(PICKUP_DATETIME),
+                firstPickUpCoord,
+                firstDropoffCoord,
+                Float.parseFloat(CSV_DATA_LIST.get(1).get(TRIP_DISTANCE))
+        );
+        System.out.println("First trip record");
+        firstTrip.printTripRecord();
 
         // get surrounding coordinates
         // calculate and see if there are other coordinates within the radius
@@ -92,7 +119,6 @@ public class TaxiClusters {
     public static void readDataIntoList() {
         // store the CSV file in a list of lists
         // outer lister represents the CSV file, inner list represents each line of the CSV file
-        //List<List<String>> csvDataList = new ArrayList<>();
         try {
             BufferedReader br = new BufferedReader(new FileReader(DATASET_NAME));
             String currLine;
