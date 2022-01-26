@@ -83,7 +83,7 @@ public class TaxiClusters {
                 Double.parseDouble(CSV_DATA_LIST.get(1).get(START_LON))
         );
         System.out.println("First pick up coord");
-        firstPickUpCoord.printCoordinate();
+        firstPickUpCoord.printCoordinates();
 
         System.out.println("======================");
 
@@ -92,7 +92,7 @@ public class TaxiClusters {
                 Double.parseDouble(CSV_DATA_LIST.get(1).get(END_LON))
         );
         System.out.println("First drop off coord");
-        firstDropoffCoord.printCoordinate();
+        firstDropoffCoord.printCoordinates();
 
         System.out.println("======================");
 

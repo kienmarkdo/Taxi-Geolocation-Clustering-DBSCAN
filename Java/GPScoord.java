@@ -24,7 +24,7 @@ public class GPScoord {
     // ==== constructors END ====
 
     // ==== class methods START ====
-    public void printCoordinate() {
+    public void printCoordinates() {
         System.out.printf("LAT: %f\nLON: %f\n", this.latitude, this.longitude);
     }
 
