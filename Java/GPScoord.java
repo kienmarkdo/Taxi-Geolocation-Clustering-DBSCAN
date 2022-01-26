@@ -6,8 +6,8 @@
 public class GPScoord {
 
     // =========================== Attributes ==========================
-    private double longitude;
     private double latitude;
+    private double longitude;
 
     // =========================== Methods ==========================
 
@@ -17,20 +17,28 @@ public class GPScoord {
     }
 
 
-    public GPScoord(double longitude, double latitude) {
-        this.longitude = longitude;
+    public GPScoord(double latitude, double longitude) {
         this.latitude = latitude;
+        this.longitude = longitude;
     }
     // ==== constructors END ====
 
     // ==== class methods START ====
     public void printCoordinate() {
-        System.out.printf("LON: %f\nLAT: %f\n", this.longitude, this.latitude);
+        System.out.printf("LAT: %f\nLON: %f\n", this.latitude, this.longitude);
     }
 
     // ==== class methods END ====
 
     // ==== getters and setters START ====
+    public double getLatitude() {
+        return latitude;
+    }
+
+    public void setLatitude(double latitude) {
+        this.latitude = latitude;
+    }
+
     public double getLongitude() {
         return longitude;
     }
@@ -39,12 +47,10 @@ public class GPScoord {
         this.longitude = longitude;
     }
 
-    public double getLatitude() {
-        return latitude;
-    }
-
-    public void setLatitude(double latitude) {
-        this.latitude = latitude;
-    }
     // ==== getters and setters END ====
+
+    @Override
+    public String toString() {
+        return String.format("(%f, %f)", this.latitude, this.longitude);
+    }
 }
