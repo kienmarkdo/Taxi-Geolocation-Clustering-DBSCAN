@@ -31,6 +31,16 @@ public class TripRecord {
 
     // ==== class methods START ====
 
+    public void printTripRecord() {
+        System.out.printf(
+                "Pickup_Datetime  : %s\n" +
+                "Pickup_Location  : %s\n" +
+                "Dropoff_Location : %s\n" +
+                "Trip_Distance    : %f\n",
+                this.pickup_DateTime, this.pickup_Location, this.dropoff_Location, this.trip_Distance
+        );
+    }
+
     // ==== class methods END ====
 
     // ==== getters and setters START ====
