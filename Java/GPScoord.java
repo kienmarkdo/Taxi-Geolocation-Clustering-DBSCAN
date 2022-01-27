@@ -13,7 +13,8 @@ public class GPScoord {
 
     // ==== constructors START ====
     public GPScoord() {
-
+        this.latitude = -1;
+        this.longitude = -1;
     }
 
 
@@ -24,8 +25,25 @@ public class GPScoord {
     // ==== constructors END ====
 
     // ==== class methods START ====
+
+    /**
+     * Prints the LAT and LON coordinates of this GPScoord in a readable format.
+     * For the classic format (LAT, LON), use toString().
+     */
     public void printCoordinates() {
         System.out.printf("LAT: %f\nLON: %f\n", this.latitude, this.longitude);
+    }
+
+    /**
+     * Calculates the distance from current GPScoord to other GPScoord.
+     * @param otherCoord other GPScoord
+     * @return (double) distance between this coord and other coord
+     */
+    public double calculateDistance(GPScoord otherCoord) {
+        return Math.sqrt(
+                Math.pow(this.latitude - otherCoord.getLatitude(), 2) +
+                Math.pow(this.longitude - otherCoord.getLongitude(), 2)
+        );
     }
 
     // ==== class methods END ====

@@ -71,45 +71,78 @@ public class TaxiClusters {
     static double EPS = 0.01;
     static int MIN_PTS = 5;
 
+    static ArrayList<GPScoord> allCoords;
+
 
     public static void main(String[] args) {
         readDataIntoList();
-        printListData();
+        //printListData();
+        addCoordsToArrayList();
 
-        System.out.println("======================");
-
-        GPScoord firstPickUpCoord = new GPScoord(
+//        System.out.println("======================");
+//
+        GPScoord firstPickupCoord = new GPScoord(
                 Double.parseDouble(CSV_DATA_LIST.get(1).get(START_LAT)),
                 Double.parseDouble(CSV_DATA_LIST.get(1).get(START_LON))
         );
-        System.out.println("First pick up coord");
-        firstPickUpCoord.printCoordinates();
-
-        System.out.println("======================");
-
-        GPScoord firstDropoffCoord = new GPScoord(
-                Double.parseDouble(CSV_DATA_LIST.get(1).get(END_LAT)),
-                Double.parseDouble(CSV_DATA_LIST.get(1).get(END_LON))
+//        System.out.println("First pick up coord");
+//        firstPickUpCoord.printCoordinates();
+//
+//        System.out.println("======================");
+//
+//        GPScoord firstDropoffCoord = new GPScoord(
+//                Double.parseDouble(CSV_DATA_LIST.get(1).get(END_LAT)),
+//                Double.parseDouble(CSV_DATA_LIST.get(1).get(END_LON))
+//        );
+        GPScoord secondPickupCoord = new GPScoord(
+                Double.parseDouble(CSV_DATA_LIST.get(2).get(START_LAT)),
+                Double.parseDouble(CSV_DATA_LIST.get(2).get(START_LON))
         );
-        System.out.println("First drop off coord");
-        firstDropoffCoord.printCoordinates();
 
-        System.out.println("======================");
+        // calculate the distance between current GPScoord and another GPScoord
+        double distance = firstPickupCoord.calculateDistance(secondPickupCoord);
+        System.out.println("Distance b/w first pickup and second pickup coord:");
+        System.out.println(distance);
 
-        TripRecord firstTrip = new TripRecord(
-                CSV_DATA_LIST.get(1).get(PICKUP_DATETIME),
-                firstPickUpCoord,
-                firstDropoffCoord,
-                Float.parseFloat(CSV_DATA_LIST.get(1).get(TRIP_DISTANCE))
-        );
-        System.out.println("First trip record");
-        firstTrip.printTripRecord();
+
+
+//        System.out.println("First drop off coord");
+//        firstDropoffCoord.printCoordinates();
+//
+//        System.out.println("======================");
+//
+//        TripRecord firstTrip = new TripRecord(
+//                CSV_DATA_LIST.get(1).get(PICKUP_DATETIME),
+//                firstPickUpCoord,
+//                firstDropoffCoord,
+//                Float.parseFloat(CSV_DATA_LIST.get(1).get(TRIP_DISTANCE))
+//        );
+//        System.out.println("First trip record");
+//        firstTrip.printTripRecord();
 
         // get surrounding coordinates
         // calculate and see if there are other coordinates within the radius
         // add all surrounding coordinates to this firstCoord's cluster
 
 
+
+
+    }
+
+    public static void addCoordsToArrayList() {
+        allCoords = new ArrayList<GPScoord>();
+
+        // i represents the row index in the CSV file
+        for (int i = 1; i < CSV_DATA_LIST.size(); i++) {
+            GPScoord currCoord = new GPScoord(
+                    Double.parseDouble(CSV_DATA_LIST.get(i).get(START_LAT)),
+                    Double.parseDouble(CSV_DATA_LIST.get(i).get(START_LON))
+            );
+            allCoords.add(currCoord);
+        }
+
+//        System.out.println("All coords:");
+//        System.out.println(allCoords);
     }
 
     /**
