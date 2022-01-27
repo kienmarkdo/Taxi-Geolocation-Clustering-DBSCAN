@@ -7,7 +7,8 @@ import java.util.List;
 
 public class Cluster {
 
-    private double coordinate;
+    private int clusterID;
+    private GPScoord thisCoord;
     private List<GPScoord> surroundingCoords;
     private int numOfSurroundingCoords;
 }
