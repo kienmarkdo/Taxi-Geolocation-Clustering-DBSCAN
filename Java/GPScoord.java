@@ -8,6 +8,7 @@ public class GPScoord {
     // =========================== Attributes ==========================
     private double latitude;
     private double longitude;
+    private boolean isNoise;
 
     // =========================== Methods ==========================
 
@@ -15,12 +16,14 @@ public class GPScoord {
     public GPScoord() {
         this.latitude = -1;
         this.longitude = -1;
+        this.isNoise = false;
     }
 
 
     public GPScoord(double latitude, double longitude) {
         this.latitude = latitude;
         this.longitude = longitude;
+        this.isNoise = false;
     }
     // ==== constructors END ====
 
@@ -63,6 +66,14 @@ public class GPScoord {
 
     public void setLongitude(double longitude) {
         this.longitude = longitude;
+    }
+
+    public boolean isNoise() {
+        return isNoise;
+    }
+
+    public void setNoise(boolean noise) {
+        isNoise = noise;
     }
 
     // ==== getters and setters END ====

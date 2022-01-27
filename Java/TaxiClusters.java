@@ -45,6 +45,56 @@ public class TaxiClusters {
 
     }
 
+    public static void DBSCAN() {
+        int clusterCounter = 0;
+
+        for (GPScoord currCoord: ALL_START_COORDS) {
+            if (currCoord == null) {
+                continue;
+            }
+
+            List<GPScoord> neighbours = rangeQuery(currCoord);
+
+            if (neighbours.size() < MIN_PTS) {
+                currCoord.setNoise(true);
+            }
+
+            clusterCounter++;
+
+            int initialID = clusterCounter;
+
+            Cluster seedSet = new Cluster();
+            seedSet.setSurroundingCoords(neighbours);
+
+            for (GPScoord seedPoint: seedSet.getSurroundingCoords()) {
+                if (seedPoint.isNoise()) {
+                    seedPoint.;
+                }
+            }
+
+
+        }
+    } // end of DBSCAN()
+
+    /**
+     * Scans the database and creates a list of neighbouring GPScoords WITHIN THE EPS RADIUS around the given GPScoord.
+     * This method is used by DBSCAN.
+     * @return a list of neighbouring GPScoords; returns an empty list if no neighbouring points exist within EPS.
+     */
+    public static List<GPScoord> rangeQuery(GPScoord thisCoord) {
+        List<GPScoord> neighbours = new ArrayList<GPScoord>();
+
+        // Scans all points in the database and compare it to the given coordinate
+        for (GPScoord otherCoord: ALL_START_COORDS) {
+            // compute the distance between thisCoord and otherCoord to check EPS; EPS is a global variable
+            if (thisCoord.calculateDistance(otherCoord) <= EPS) {
+                neighbours.add(otherCoord);
+            }
+        }
+        return neighbours;
+    } // end of rangeQuery
+
+
     /**
      * Adds all the start coords from the List that represents the CSV file into an ArrayList.
      * Extract START_LAT and START_LON from CSV_DATA_LIST and puts it into an ArrayList of GPScoords.
