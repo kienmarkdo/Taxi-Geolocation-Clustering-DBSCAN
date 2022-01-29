@@ -1,4 +1,5 @@
 import java.io.*;
+import java.sql.Array;
 import java.sql.SQLOutput;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -17,19 +18,20 @@ public class TaxiClusters {
     static String DATASET_NAME = "yellow_tripdata_2009-01-15_1hour_clean.csv";
     static List<List<String>> CSV_DATA_LIST = new ArrayList<>(); // must be initialized with readDataIntoList()
 
+    // CSV file indices
+    static int PICKUP_DATETIME = 4;
+    static int TRIP_DISTANCE = 7;
     static int START_LON = 8; // represents the column index of START_LON in the CSV file
     static int START_LAT = 9; // same as above...
     static int END_LON = 12;
     static int END_LAT = 13;
 
-    static int PICKUP_DATETIME = 4;
-    static int TRIP_DISTANCE = 7;
-
     // DBSCAN attributes
-    static double EPS = 0.01; // eps is a distance perimeter, like a radius
+    static double EPS = 0.0001; // eps is a distance perimeter, like a radius
     static int MIN_PTS = 5; // minPts is the min points within EPS such that this radius counts as a cluster
 
-    static ArrayList<GPScoord> ALL_START_COORDS;
+    static ArrayList<TripRecord> TRIPS = new ArrayList<>();
+    static ArrayList<Cluster> CLUSTERS = new ArrayList<>();
 
     // ================================  Attributes END  ================================
 
@@ -40,7 +42,19 @@ public class TaxiClusters {
      */
     public static void main(String[] args) {
         readDataIntoList();
-        addStartCoordsToArrayList();
+        readToTripRecord();
+        //System.out.println("First coordinate: " + TRIPS.get(1).getPickup_Location());
+
+//        List<TripRecord> neighbours = new ArrayList<>();
+//        neighbours = rangeQuery(TRIPS.get(1));
+//
+//        System.out.println(neighbours);
+        //System.out.println("first " + TRIPS.get(0));
+
+        DBSCAN();
+        for (Cluster cluster : CLUSTERS) {
+            cluster.printCluster();
+        }
 
 
     }
@@ -48,69 +62,98 @@ public class TaxiClusters {
     public static void DBSCAN() {
         int clusterCounter = 0;
 
-        for (GPScoord currCoord: ALL_START_COORDS) {
-            if (currCoord == null) {
+        for (TripRecord currTrip: TRIPS) {
+
+            if (!currTrip.getLabel().equals("undefined")) {
                 continue;
             }
 
-            List<GPScoord> neighbours = rangeQuery(currCoord);
+            ArrayList<TripRecord> neighbours = rangeQuery(currTrip);
 
             if (neighbours.size() < MIN_PTS) {
-                currCoord.setNoise(true);
+                currTrip.setLabel("noise");
+                continue;
             }
 
             clusterCounter++;
 
-            int initialID = clusterCounter;
+            currTrip.setLabel(String.valueOf(clusterCounter));
 
-            Cluster seedSet = new Cluster();
-            seedSet.setSurroundingCoords(neighbours);
+            Cluster seedSet = new Cluster(); // Neighbours to expand
+            seedSet.setCoreTrip(currTrip);
+            seedSet.setSurroundingTrips(neighbours);
+            List<TripRecord> surrTrips = seedSet.getSurroundingTrips();
 
-            for (GPScoord seedPoint: seedSet.getSurroundingCoords()) {
-                if (seedPoint.isNoise()) {
-                    seedPoint.;
+            for (int i = 0; i < surrTrips.size(); i++) {
+                if (surrTrips.get(i).getLabel().equals("noise")) {
+                    surrTrips.get(i).setLabel(String.valueOf(clusterCounter));
                 }
-            }
+                if (!surrTrips.get(i).getLabel().equals("undefined")) {
+                    continue;
+                }
+                surrTrips.get(i).setLabel(String.valueOf(clusterCounter));
+                ArrayList<TripRecord> seedNeighbours = rangeQuery(surrTrips.get(i));
 
+                if (seedNeighbours.size() >= MIN_PTS) {
+                    seedSet.add(seedNeighbours);
+                }
 
-        }
+            } // end of for loop
+
+            CLUSTERS.add(seedSet);
+
+        } // end of TripRecord for loop
+
     } // end of DBSCAN()
 
     /**
      * Scans the database and creates a list of neighbouring GPScoords WITHIN THE EPS RADIUS around the given GPScoord.
      * This method is used by DBSCAN.
+     * Assume that GPScoord thisCoord is not null.
      * @return a list of neighbouring GPScoords; returns an empty list if no neighbouring points exist within EPS.
      */
-    public static List<GPScoord> rangeQuery(GPScoord thisCoord) {
-        List<GPScoord> neighbours = new ArrayList<GPScoord>();
+    public static ArrayList<TripRecord> rangeQuery(TripRecord thisTrip) {
+        ArrayList<TripRecord> neighbours = new ArrayList<>();
 
         // Scans all points in the database and compare it to the given coordinate
-        for (GPScoord otherCoord: ALL_START_COORDS) {
+        for (TripRecord otherTrip: TRIPS) {
             // compute the distance between thisCoord and otherCoord to check EPS; EPS is a global variable
-            if (thisCoord.calculateDistance(otherCoord) <= EPS) {
-                neighbours.add(otherCoord);
+            if (thisTrip.calculateDistance(otherTrip) <= EPS) {
+                neighbours.add(otherTrip);
             }
         }
+
         return neighbours;
     } // end of rangeQuery
 
 
     /**
-     * Adds all the start coords from the List that represents the CSV file into an ArrayList.
-     * Extract START_LAT and START_LON from CSV_DATA_LIST and puts it into an ArrayList of GPScoords.
+     * Extract information relevant to TripRecord from List<List<String>> CSV_DATA_LIST.
+     * Reads the CSV data from List<List<String>> CSV_DATA_LIST into an ArrayList of all TripRecords
      */
-    public static void addStartCoordsToArrayList() {
-        ALL_START_COORDS = new ArrayList<GPScoord>();
+    public static void readToTripRecord() {
 
         // i represents the row index in the CSV file
         for (int i = 1; i < CSV_DATA_LIST.size(); i++) {
-            GPScoord currCoord = new GPScoord(
-                    Double.parseDouble(CSV_DATA_LIST.get(i).get(START_LAT)),
-                    Double.parseDouble(CSV_DATA_LIST.get(i).get(START_LON))
+            // extract information relevant to TripRecord individually, one at a time
+            GPScoord currPickupCoord = new GPScoord(
+                    Float.parseFloat(CSV_DATA_LIST.get(i).get(START_LAT)),
+                    Float.parseFloat(CSV_DATA_LIST.get(i).get(START_LON))
             );
-            ALL_START_COORDS.add(currCoord);
+            GPScoord currDropoffCoord = new GPScoord(
+                    Float.parseFloat(CSV_DATA_LIST.get(i).get(END_LAT)),
+                    Float.parseFloat(CSV_DATA_LIST.get(i).get(END_LON))
+            );
+
+            String currPickupDateTime = CSV_DATA_LIST.get(i).get(PICKUP_DATETIME);
+            float currDistance = Float.parseFloat(CSV_DATA_LIST.get(i).get(TRIP_DISTANCE));
+
+            // add extracted information into a new object TripRecord then add the object to the list of all trips
+            TripRecord thisTrip = new TripRecord(currPickupDateTime, currPickupCoord, currDropoffCoord, currDistance);
+            TRIPS.add(thisTrip);
+            //ALL_START_COORDS.add(currPickupCoord);
         }
-    }
+    } // end of readToTripRecord()
 
     /**
      * Puts the data from the CSV file into a List.
@@ -122,16 +165,14 @@ public class TaxiClusters {
         try {
             BufferedReader br = new BufferedReader(new FileReader(DATASET_NAME));
             String currLine;
-            int i = 0;
-            while ((currLine = br.readLine()) != null && i < 10) {
-                ++i;
+            while ((currLine = br.readLine()) != null) {
                 String[] values = currLine.split(COMMA_DELIMITER);
                 CSV_DATA_LIST.add(Arrays.asList(values));
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
-    }
+    } // end of readDataIntoList()
 
     /**
      * Prints the dataset after it has been transferred into a List, line by line.
@@ -142,7 +183,7 @@ public class TaxiClusters {
         for (int i = 0; i < CSV_DATA_LIST.size(); i++) {
             System.out.println(CSV_DATA_LIST.get(i));
         }
-    }
+    } // end of printListData()
 
 
 

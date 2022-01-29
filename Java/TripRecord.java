@@ -10,6 +10,7 @@ public class TripRecord {
     private GPScoord pickup_Location;
     private GPScoord dropoff_Location;
     private float trip_Distance;
+    private String label;
 
     // =========================== Methods ==========================
 
@@ -17,7 +18,7 @@ public class TripRecord {
     // ==== constructors START ====
 
     public TripRecord() {
-
+        this.label = "undefined";
     }
 
     public TripRecord(String pickup_DateTime, GPScoord pickup_Location, GPScoord dropoff_Location, float trip_Distance) {
@@ -25,6 +26,7 @@ public class TripRecord {
         this.pickup_Location = pickup_Location;
         this.dropoff_Location = dropoff_Location;
         this.trip_Distance = trip_Distance;
+        this.label = "undefined";
     }
 
     // ==== constructors END ====
@@ -38,6 +40,18 @@ public class TripRecord {
                 "Dropoff_Location : %s\n" +
                 "Trip_Distance    : %f\n",
                 this.pickup_DateTime, this.pickup_Location, this.dropoff_Location, this.trip_Distance
+        );
+    }
+
+    /**
+     * Calculates the distance from current pickup_location to other pickup_location.
+     * @param otherTrip other trip
+     * @return (float) distance between this starting coord and other starting coord
+     */
+    public float calculateDistance(TripRecord otherTrip) {
+        return (float) Math.sqrt(
+                Math.pow(this.pickup_Location.getLatitude() - otherTrip.getPickup_Location().getLatitude(), 2) +
+                        Math.pow(this.pickup_Location.getLongitude() - otherTrip.pickup_Location.getLongitude(), 2)
         );
     }
 
@@ -77,5 +91,18 @@ public class TripRecord {
         this.trip_Distance = trip_Distance;
     }
 
+    public String getLabel() {
+        return label;
+    }
+
+    public void setLabel(String label) {
+        this.label = label;
+    }
+
     // ==== getters and setters END ====
+
+    @Override
+    public String toString() {
+        return this.pickup_Location.toString();
+    }
 }

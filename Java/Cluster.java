@@ -1,3 +1,4 @@
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -8,76 +9,61 @@ import java.util.List;
 public class Cluster {
 
     // =========================== Attributes ==========================
-    private int clusterID;
-    private GPScoord thisCoord;
-    private List<GPScoord> surroundingCoords;
-    private int numOfSurroundingCoords;
-    private boolean isNoise;
+    private TripRecord coreTrip;
+    private List<TripRecord> surroundingTrips;
 
     // =========================== Methods ==========================
 
     // ==== constructors START ====
     public Cluster() {
-        this.isNoise = false;
-    }
-
-    public Cluster(Cluster other) {
-        this.clusterID = other.getClusterID();
-        this.thisCoord = other.getThisCoord();
-        this.surroundingCoords = other.getSurroundingCoords();
-        this.numOfSurroundingCoords = other.getNumOfSurroundingCoords();
-        this.isNoise = other.isNoise();
+        this.coreTrip = new TripRecord();
+        this.surroundingTrips = new ArrayList<>();
     }
 
     // ==== constructors END ====
 
     // ==== class methods START ====
 
+    public void printCluster() {
+        System.out.printf("" +
+                "Cluster ID: %3s          " +
+                "Longitude: %10f          " +
+                "Latitude: %10f           " +
+                "Number of points: %3d\n",
+                this.coreTrip.getLabel(), this.coreTrip.getPickup_Location().getLongitude(),
+                this.coreTrip.getPickup_Location().getLatitude(), this.surroundingTrips.size()
+        );
+    }
+
+    public void add(List<TripRecord> setOfTrips) {
+        for (TripRecord newTrip: setOfTrips) {
+            if (!this.surroundingTrips.contains(newTrip)) {
+                this.surroundingTrips.add(newTrip);
+            }
+        }
+    }
 
     // ==== class methods END ====
 
     // ==== getters and setters START ====
 
-    public int getClusterID() {
-        return clusterID;
+    public TripRecord getCoreTrip() {
+        return coreTrip;
     }
 
-    public void setClusterID(int clusterID) {
-        this.clusterID = clusterID;
+    public void setCoreTrip(TripRecord coreTrip) {
+        this.coreTrip = coreTrip;
     }
 
-    public GPScoord getThisCoord() {
-        return thisCoord;
+    public List<TripRecord> getSurroundingTrips() {
+        return surroundingTrips;
     }
 
-    public void setThisCoord(GPScoord thisCoord) {
-        this.thisCoord = thisCoord;
+    public void setSurroundingTrips(List<TripRecord> surroundingTrips) {
+        this.surroundingTrips = surroundingTrips;
+        this.surroundingTrips.remove(this.coreTrip);
     }
 
-    public List<GPScoord> getSurroundingCoords() {
-        return surroundingCoords;
-    }
-
-    public void setSurroundingCoords(List<GPScoord> surroundingCoords) {
-        this.surroundingCoords = surroundingCoords;
-        this.numOfSurroundingCoords = this.surroundingCoords.size();
-    }
-
-    public int getNumOfSurroundingCoords() {
-        return numOfSurroundingCoords;
-    }
-
-    public void setNumOfSurroundingCoords(int numOfSurroundingCoords) {
-        this.numOfSurroundingCoords = numOfSurroundingCoords;
-    }
-
-    public boolean isNoise() {
-        return isNoise;
-    }
-
-    public void setNoise(boolean noise) {
-        isNoise = noise;
-    }
 
     // ==== getters and setters END ====
 
