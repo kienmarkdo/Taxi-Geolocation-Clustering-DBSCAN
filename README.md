@@ -23,3 +23,5 @@ UML class diagrams and detailed documentation are also included in the developme
 The dataset is taken from NYC's 2009 taxi database that recorded taxi trips in the span of 1 hour. The dataset is contained in a CSV file, with each line corresponding to a trip record and the columns representing the relevant attributes of each trip. Since we want to identify the best waiting areas, we are interested in the starting points. As such, the dataset includes the GPS coordinates of the start and end point for each taxi trip.
 
 ![plottedLocationsGPS](https://user-images.githubusercontent.com/67518620/150623764-db94fc77-e238-46b7-abd5-0b0630aeabb8.png)
+![sample_clusters_robert_laganiere](https://user-images.githubusercontent.com/67518620/151680248-c186dad7-6826-4ba7-980d-7c0ad32a0933.png)
+
