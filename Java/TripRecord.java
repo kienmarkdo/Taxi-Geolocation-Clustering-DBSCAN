@@ -48,8 +48,8 @@ public class TripRecord {
      * @param otherTrip other trip
      * @return (float) distance between this starting coord and other starting coord
      */
-    public float calculateDistance(TripRecord otherTrip) {
-        return (float) Math.sqrt(
+    public double calculateDistance(TripRecord otherTrip) {
+        return Math.sqrt(
                 Math.pow(this.pickup_Location.getLatitude() - otherTrip.getPickup_Location().getLatitude(), 2) +
                         Math.pow(this.pickup_Location.getLongitude() - otherTrip.pickup_Location.getLongitude(), 2)
         );
