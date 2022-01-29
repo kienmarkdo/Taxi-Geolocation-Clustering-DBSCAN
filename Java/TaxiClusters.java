@@ -41,20 +41,16 @@ public class TaxiClusters {
      * @param args
      */
     public static void main(String[] args) {
+        // TODO: Need to change all methods to non-static method then instantiate a TaxiCluster object in main()
         readDataIntoList();
         readToTripRecord();
-        //System.out.println("First coordinate: " + TRIPS.get(1).getPickup_Location());
-
-//        List<TripRecord> neighbours = new ArrayList<>();
-//        neighbours = rangeQuery(TRIPS.get(1));
-//
-//        System.out.println(neighbours);
-        //System.out.println("first " + TRIPS.get(0));
 
         DBSCAN();
         for (Cluster cluster : CLUSTERS) {
             cluster.printCluster();
         }
+
+        createAndWriteToCSV();
 
 
     }
@@ -81,18 +77,18 @@ public class TaxiClusters {
 
             Cluster seedSet = new Cluster(); // Neighbours to expand
             seedSet.setCoreTrip(currTrip);
-            seedSet.setSurroundingTrips(neighbours);
-            List<TripRecord> surrTrips = seedSet.getSurroundingTrips();
+            seedSet.setSurroundingTrips(neighbours); // setSurroundingTrips remove the core point
+            List<TripRecord> surrSeedTrips = seedSet.getSurroundingTrips();
 
-            for (int i = 0; i < surrTrips.size(); i++) {
-                if (surrTrips.get(i).getLabel().equals("noise")) {
-                    surrTrips.get(i).setLabel(String.valueOf(clusterCounter));
+            for (int i = 0; i < surrSeedTrips.size(); i++) {
+                if (surrSeedTrips.get(i).getLabel().equals("noise")) {
+                    surrSeedTrips.get(i).setLabel(String.valueOf(clusterCounter));
                 }
-                if (!surrTrips.get(i).getLabel().equals("undefined")) {
+                if (!surrSeedTrips.get(i).getLabel().equals("undefined")) {
                     continue;
                 }
-                surrTrips.get(i).setLabel(String.valueOf(clusterCounter));
-                ArrayList<TripRecord> seedNeighbours = rangeQuery(surrTrips.get(i));
+                surrSeedTrips.get(i).setLabel(String.valueOf(clusterCounter));
+                ArrayList<TripRecord> seedNeighbours = rangeQuery(surrSeedTrips.get(i));
 
                 if (seedNeighbours.size() >= MIN_PTS) {
                     seedSet.add(seedNeighbours);
@@ -107,29 +103,37 @@ public class TaxiClusters {
     } // end of DBSCAN()
 
     /**
-     * Scans the database and creates a list of neighbouring GPScoords WITHIN THE EPS RADIUS around the given GPScoord.
+     * Scans the database and creates a list of neighbouring TripRecords WITHIN THE EPS RADIUS around the given TripRecord.
      * This method is used by DBSCAN.
-     * Assume that GPScoord thisCoord is not null.
-     * @return a list of neighbouring GPScoords; returns an empty list if no neighbouring points exist within EPS.
+     * @return a list of neighbouring TripRecords; returns an empty list if no neighbouring points exist within EPS.
      */
     public static ArrayList<TripRecord> rangeQuery(TripRecord thisTrip) {
+
+        if (thisTrip == null) {
+            throw new NullPointerException("ERROR : thisTrip parameter is Null");
+        }
+
         ArrayList<TripRecord> neighbours = new ArrayList<>();
 
         // Scans all points in the database and compare it to the given coordinate
         for (TripRecord otherTrip: TRIPS) {
             // compute the distance between thisCoord and otherCoord to check EPS; EPS is a global variable
-            if (thisTrip.calculateDistance(otherTrip) <= EPS) {
+            if (thisTrip != otherTrip && thisTrip.calculateDistance(otherTrip) <= EPS) {
+                // TODO: NOTE -- thisTrip != otherTrip is NOT the same as DBSCAN
+                //  the actual DBSCAN algorithm includes thisTrip as a neighbouring point to be compared with MIN_PTS
+                //  OTHER NOTE: With this current code, the current output's cluster count is the same as the Sample Output,
+                //  but the Number of Points is slightly off.
                 neighbours.add(otherTrip);
             }
         }
 
         return neighbours;
-    } // end of rangeQuery
+    } // end of rangeQuery()
 
 
     /**
      * Extract information relevant to TripRecord from List<List<String>> CSV_DATA_LIST.
-     * Reads the CSV data from List<List<String>> CSV_DATA_LIST into an ArrayList of all TripRecords
+     * Reads the CSV data from List<List<String>> CSV_DATA_LIST into an ArrayList of all TripRecords.
      */
     public static void readToTripRecord() {
 
@@ -137,12 +141,12 @@ public class TaxiClusters {
         for (int i = 1; i < CSV_DATA_LIST.size(); i++) {
             // extract information relevant to TripRecord individually, one at a time
             GPScoord currPickupCoord = new GPScoord(
-                    Float.parseFloat(CSV_DATA_LIST.get(i).get(START_LAT)),
-                    Float.parseFloat(CSV_DATA_LIST.get(i).get(START_LON))
+                    Double.parseDouble(CSV_DATA_LIST.get(i).get(START_LAT)),
+                    Double.parseDouble(CSV_DATA_LIST.get(i).get(START_LON))
             );
             GPScoord currDropoffCoord = new GPScoord(
-                    Float.parseFloat(CSV_DATA_LIST.get(i).get(END_LAT)),
-                    Float.parseFloat(CSV_DATA_LIST.get(i).get(END_LON))
+                    Double.parseDouble(CSV_DATA_LIST.get(i).get(END_LAT)),
+                    Double.parseDouble(CSV_DATA_LIST.get(i).get(END_LON))
             );
 
             String currPickupDateTime = CSV_DATA_LIST.get(i).get(PICKUP_DATETIME);
@@ -151,7 +155,6 @@ public class TaxiClusters {
             // add extracted information into a new object TripRecord then add the object to the list of all trips
             TripRecord thisTrip = new TripRecord(currPickupDateTime, currPickupCoord, currDropoffCoord, currDistance);
             TRIPS.add(thisTrip);
-            //ALL_START_COORDS.add(currPickupCoord);
         }
     } // end of readToTripRecord()
 
@@ -184,6 +187,28 @@ public class TaxiClusters {
             System.out.println(CSV_DATA_LIST.get(i));
         }
     } // end of printListData()
+
+    /**
+     * Creates a CSV file and write CLUSTERS to it.
+     */
+    public static void createAndWriteToCSV() {
+        try (PrintWriter writer = new PrintWriter("test_" + EPS + "_" + MIN_PTS + ".csv")) {
+
+            StringBuilder sb = new StringBuilder("Cluster_ID,Longitude,Latitude,Number_Of_Points\n");
+
+            for (int i = 0; i < CLUSTERS.size(); i++) {
+                sb.append(CLUSTERS.get(i).toString());
+            }
+
+            writer.write(sb.toString());
+
+            System.out.println("done!");
+
+        } catch (FileNotFoundException e) {
+            System.out.println(e.getMessage());
+        }
+
+    }
 
 
 

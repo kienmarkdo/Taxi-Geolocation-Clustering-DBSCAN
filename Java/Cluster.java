@@ -31,7 +31,7 @@ public class Cluster {
                 "Latitude: %10f           " +
                 "Number of points: %3d\n",
                 this.coreTrip.getLabel(), this.coreTrip.getPickup_Location().getLongitude(),
-                this.coreTrip.getPickup_Location().getLatitude(), this.surroundingTrips.size()
+                this.coreTrip.getPickup_Location().getLatitude(), this.size()
         );
     }
 
@@ -41,6 +41,10 @@ public class Cluster {
                 this.surroundingTrips.add(newTrip);
             }
         }
+    }
+
+    public int size() {
+        return this.surroundingTrips.size() + 1;
     }
 
     // ==== class methods END ====
@@ -66,6 +70,15 @@ public class Cluster {
 
 
     // ==== getters and setters END ====
+
+    /**
+     * toString method
+     * @return Returns a string of Cluster in CSV format with the comma being the separator.
+     */
+    public String toString() {
+        return String.format("%s,%s,%s,%s\n", this.coreTrip.getLabel(), this.coreTrip.getPickup_Location().getLongitude(),
+                this.coreTrip.getPickup_Location().getLatitude(), this.surroundingTrips.size() + 1);
+    }
 
 
 }

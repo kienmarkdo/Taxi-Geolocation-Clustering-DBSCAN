@@ -34,17 +34,6 @@ public class GPScoord {
         System.out.printf("LAT: %f\nLON: %f\n", this.latitude, this.longitude);
     }
 
-//    /**
-//     * Calculates the distance from current GPScoord to other GPScoord.
-//     * @param otherCoord other GPScoord
-//     * @return (double) distance between this coord and other coord
-//     */
-//    public double calculateDistance(GPScoord otherCoord) {
-//        return (double) Math.sqrt(
-//                Math.pow(this.latitude - otherCoord.getLatitude(), 2) +
-//                Math.pow(this.longitude - otherCoord.getLongitude(), 2)
-//        );
-//    }
 
     // ==== class methods END ====
 
