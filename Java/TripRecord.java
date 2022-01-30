@@ -1,15 +1,35 @@
 /**
  * Kien Do 300163370
  * CSI2520 - Paradigmes de programmation - Hiver 2022
+ *
+ * TripRecord class represents one taxi trip with its pickup_Location being its unique identifier.
+ *  This class acts as ONE point in the DBSCAN, but since the entire trip cannot be used as a point, its starting
+ *  location is used instead.
  */
 
 public class TripRecord {
 
     // =========================== Attributes ==========================
+    /**
+     * String representation of the taxi pickup date and time.
+     */
     private String pickup_DateTime;
+    /**
+     * GPS coordinate of the taxi pickup location.
+     */
     private GPScoord pickup_Location;
+    /**
+     * GPS coordinate of the taxi drop off location.
+     */
     private GPScoord dropoff_Location;
+    /**
+     * Represents the distance between the pickup location and the drop off location.
+     */
     private float trip_Distance;
+    /**
+     * This label is to be used in DBSCAN to identify whether trip record has been processed, whether it is a noise
+     *  point, or whether it is a cluster.
+     */
     private String label;
 
     // =========================== Methods ==========================
@@ -33,6 +53,9 @@ public class TripRecord {
 
     // ==== class methods START ====
 
+    /**
+     * Prints the TripRecord into the console in a readable format.
+     */
     public void printTripRecord() {
         System.out.printf(
                 "Pickup_Datetime  : %s\n" +
@@ -44,9 +67,9 @@ public class TripRecord {
     }
 
     /**
-     * Calculates the distance from current pickup_location to other pickup_location.
+     * Calculates the distance from this pickup_location to other pickup_location (passed as a parameter).
      * @param otherTrip other trip
-     * @return (float) distance between this starting coord and other starting coord
+     * @return distance between this starting/pickup location and starting/pickup location
      */
     public double calculateDistance(TripRecord otherTrip) {
         return Math.sqrt(
@@ -101,8 +124,13 @@ public class TripRecord {
 
     // ==== getters and setters END ====
 
+    /**
+     * toString() method returns the object in a string format.
+     * @return Returns the GPS coordinate of the pickup location, as TripRecord's identifier is its pickup location
+     */
     @Override
     public String toString() {
         return this.pickup_Location.toString();
     }
-}
+
+} // end of TripRecord.java

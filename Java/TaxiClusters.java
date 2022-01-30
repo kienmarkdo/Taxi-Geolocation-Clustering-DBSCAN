@@ -1,24 +1,24 @@
 import java.io.*;
-import java.sql.Array;
-import java.sql.SQLOutput;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Scanner;
 
 /**
  * Kien Do 300163370
  * CSI2520 - Paradigmes de programmation - Hiver 2022
+ *
+ * TaxiClusters class is the main class that runs DBSCAN and produces the CSV output file of clusters.
  */
 
 public class TaxiClusters {
 
     // ================================  Attributes START  ================================
+    // CSV file's required information before it can be processed
     static String COMMA_DELIMITER = ","; // defining the comma delimiter of the CSV file
     static String DATASET_NAME = "yellow_tripdata_2009-01-15_1hour_clean.csv";
     static List<List<String>> CSV_DATA_LIST = new ArrayList<>(); // must be initialized with readDataIntoList()
 
-    // CSV file indices
+    // column indices of the relevant information in the CSV file
     static int PICKUP_DATETIME = 4;
     static int TRIP_DISTANCE = 7;
     static int START_LON = 8; // represents the column index of START_LON in the CSV file
@@ -30,35 +30,37 @@ public class TaxiClusters {
     static double EPS = 0.0001; // eps is a distance perimeter, like a radius
     static int MIN_PTS = 5; // minPts is the min points within EPS such that this radius counts as a cluster
 
+    // a list of all TripRecords and Clusters; CLUSTERS will be used to output the CSV file containing all the clusters
     static ArrayList<TripRecord> TRIPS = new ArrayList<>();
     static ArrayList<Cluster> CLUSTERS = new ArrayList<>();
-
     // ================================  Attributes END  ================================
-
 
     /**
      * Main method
+     *
      * @param args
      */
     public static void main(String[] args) {
-        // TODO: Need to change all methods to non-static method then instantiate a TaxiCluster object in main()
-        readDataIntoList();
-        readToTripRecord();
+        TaxiClusters taxiClusters = new TaxiClusters();
+        taxiClusters.readDataIntoList();
+        taxiClusters.readToTripRecord();
 
-        DBSCAN();
+        taxiClusters.DBSCAN();
         for (Cluster cluster : CLUSTERS) {
             cluster.printCluster();
         }
 
-        createAndWriteToCSV();
-
-
+        taxiClusters.createAndWriteResultsToCSV();
     }
 
-    public static void DBSCAN() {
+    /**
+     * DBSCAN algorithm used to cluster all the TripRecords together while discarding all TripRecords considered as noise.
+     * Does not take EPS and MIN_PTS as parameters because they are global variables.
+     */
+    public void DBSCAN() {
         int clusterCounter = 0;
 
-        for (TripRecord currTrip: TRIPS) {
+        for (TripRecord currTrip : TRIPS) {
 
             if (!currTrip.getLabel().equals("undefined")) {
                 continue;
@@ -76,45 +78,23 @@ public class TaxiClusters {
             currTrip.setLabel(String.valueOf(clusterCounter));
 
             Cluster seedSet = new Cluster(); // Neighbours to expand
-//            seedSet.setCoreTrip(currTrip);
-//            seedSet.setSurroundingTrips(neighbours); // setSurroundingTrips remove the core point
-//            List<TripRecord> surrSeedTrips = seedSet.getSurroundingTrips();
+            seedSet.getCluster().add(currTrip);
+            seedSet.getCluster().addAll(neighbours);
 
-            seedSet.cluster.add(currTrip);
-            seedSet.cluster.addAll(neighbours);
-
-            for (int i = 0; i < seedSet.cluster.size(); i++) {
-                if (seedSet.cluster.get(i).getLabel().equals("noise")) {
-                    seedSet.cluster.get(i).setLabel(String.valueOf(clusterCounter));
+            for (int i = 0; i < seedSet.getCluster().size(); i++) {
+                if (seedSet.getCluster().get(i).getLabel().equals("noise")) {
+                    seedSet.getCluster().get(i).setLabel(String.valueOf(clusterCounter));
                 }
-                if (!seedSet.cluster.get(i).getLabel().equals("undefined")) {
+                if (!seedSet.getCluster().get(i).getLabel().equals("undefined")) {
                     continue;
                 }
-                seedSet.cluster.get(i).setLabel(String.valueOf(clusterCounter));
-                ArrayList<TripRecord> seedNeighbours = rangeQuery(seedSet.cluster.get(i));
+                seedSet.getCluster().get(i).setLabel(String.valueOf(clusterCounter));
+                ArrayList<TripRecord> seedNeighbours = rangeQuery(seedSet.getCluster().get(i));
 
                 if (seedNeighbours.size() >= MIN_PTS) {
-                    // seedSet.add(seedNeighbours);
-                    seedSet.add(seedNeighbours);
+                    seedSet.add(seedNeighbours); // does not add duplicate neighbours
                 }
-
             } // end of for loop
-
-//            for (int i = 0; i < surrSeedTrips.size(); i++) {
-//                if (surrSeedTrips.get(i).getLabel().equals("noise")) {
-//                    surrSeedTrips.get(i).setLabel(String.valueOf(clusterCounter));
-//                }
-//                if (!surrSeedTrips.get(i).getLabel().equals("undefined")) {
-//                    continue;
-//                }
-//                surrSeedTrips.get(i).setLabel(String.valueOf(clusterCounter));
-//                ArrayList<TripRecord> seedNeighbours = rangeQuery(surrSeedTrips.get(i));
-//
-//                if (seedNeighbours.size() >= MIN_PTS) {
-//                    seedSet.add(seedNeighbours);
-//                }
-//
-//            } // end of for loop
 
             CLUSTERS.add(seedSet);
 
@@ -122,27 +102,30 @@ public class TaxiClusters {
 
     } // end of DBSCAN()
 
+
     /**
-     * Scans the database and creates a list of neighbouring TripRecords WITHIN THE EPS RADIUS around the given TripRecord.
-     * This method is used by DBSCAN.
+     * Scans the database and creates a list of neighbouring TripRecords WITHIN THE DEFINED EPS RADIUS around the given TripRecord.
+     *  This method is used by DBSCAN.
+     *  NOTE: This is a modified rangeQuery() method as it does not include the parameter point as a neighbouring points,
+     *  which is different from the traditional implementation of the DBSCAN algorithm.
+     *
+     * @param thisTrip this core trip / core point is required to determine its own neighbouring trips
      * @return a list of neighbouring TripRecords; returns an empty list if no neighbouring points exist within EPS.
      */
-    public static ArrayList<TripRecord> rangeQuery(TripRecord thisTrip) {
+    public ArrayList<TripRecord> rangeQuery(TripRecord thisTrip) {
 
         if (thisTrip == null) {
-            throw new NullPointerException("ERROR : thisTrip parameter is Null");
+            throw new NullPointerException("ERROR : TripRecord parameter is NULL");
         }
 
         ArrayList<TripRecord> neighbours = new ArrayList<>();
 
-        // Scans all points in the database and compare it to the given coordinate
-        for (TripRecord otherTrip: TRIPS) {
-            // compute the distance between thisCoord and otherCoord to check EPS; EPS is a global variable
+        // Scans all points in the database and compares those points to the given TripRecord's starting coordinate
+        for (TripRecord otherTrip : TRIPS) {
+            // compute the distance between thisTrip and otherTrip; compare that distance to EPS; EPS is a global variable
+            // NOTE -- thisTrip != otherTrip condition in the if statement is NOT the same as the traditional DBSCAN
+            //  the actual DBSCAN algorithm counts thisTrip as a neighbouring point to be compared with MIN_PTS
             if (thisTrip != otherTrip && thisTrip.calculateDistance(otherTrip) <= EPS) {
-                // TODO: NOTE -- thisTrip != otherTrip is NOT the same as DBSCAN
-                //  the actual DBSCAN algorithm includes thisTrip as a neighbouring point to be compared with MIN_PTS
-                //  OTHER NOTE: With this current code, the current output's cluster count is the same as the Sample Output,
-                //  but the Number of Points is slightly off.
                 neighbours.add(otherTrip);
             }
         }
@@ -152,12 +135,12 @@ public class TaxiClusters {
 
 
     /**
-     * Extract information relevant to TripRecord from List<List<String>> CSV_DATA_LIST.
      * Reads the CSV data from List<List<String>> CSV_DATA_LIST into an ArrayList of all TripRecords.
+     * Extracts information relevant to TripRecord from List<List<String>> CSV_DATA_LIST.
      */
-    public static void readToTripRecord() {
+    public void readToTripRecord() {
 
-        // i represents the row index in the CSV file
+        // int i represents the row index in the CSV file; starts at 1 because the first row is not actual data
         for (int i = 1; i < CSV_DATA_LIST.size(); i++) {
             // extract information relevant to TripRecord individually, one at a time
             GPScoord currPickupCoord = new GPScoord(
@@ -172,7 +155,7 @@ public class TaxiClusters {
             String currPickupDateTime = CSV_DATA_LIST.get(i).get(PICKUP_DATETIME);
             float currDistance = Float.parseFloat(CSV_DATA_LIST.get(i).get(TRIP_DISTANCE));
 
-            // add extracted information into a new object TripRecord then add the object to the list of all trips
+            // add extracted information into a new TripRecord object then add the object to the list of all trips
             TripRecord thisTrip = new TripRecord(currPickupDateTime, currPickupCoord, currDropoffCoord, currDistance);
             TRIPS.add(thisTrip);
         }
@@ -182,14 +165,13 @@ public class TaxiClusters {
      * Puts the data from the CSV file into a List.
      * The dataset's name and the List to which the information will be inputted are global variables.
      */
-    public static void readDataIntoList() {
-        // store the CSV file in a list of lists
-        // outer lister represents the CSV file, inner list represents each line of the CSV file
+    public void readDataIntoList() {
+        // stores the CSV file in a list of lists so that it can be processed
         try {
             BufferedReader br = new BufferedReader(new FileReader(DATASET_NAME));
             String currLine;
             while ((currLine = br.readLine()) != null) {
-                String[] values = currLine.split(COMMA_DELIMITER);
+                String[] values = currLine.split(COMMA_DELIMITER); // splits the values by their comma delimiter
                 CSV_DATA_LIST.add(Arrays.asList(values));
             }
         } catch (IOException e) {
@@ -198,9 +180,9 @@ public class TaxiClusters {
     } // end of readDataIntoList()
 
     /**
-     * Prints the dataset after it has been transferred into a List, line by line.
+     * Prints the entire dataset in its raw text-file format AFTER it has been transferred into a List.
      */
-    public static void printListData() {
+    public void printListData() {
         System.out.println("File\n\n");
 
         for (int i = 0; i < CSV_DATA_LIST.size(); i++) {
@@ -209,10 +191,12 @@ public class TaxiClusters {
     } // end of printListData()
 
     /**
-     * Creates a CSV file and write CLUSTERS to it.
+     * Creates a CSV file and write CLUSTERS to it. This method essentially outputs clusters after the input data
+     *  has been processed by DBSCAN and populated into an object that stores all the clusters.
      */
-    public static void createAndWriteToCSV() {
-        try (PrintWriter writer = new PrintWriter("test_" + EPS + "_" + MIN_PTS + ".csv")) {
+    public void createAndWriteResultsToCSV() {
+        // creates the CSV file's name according to its EPS and MIN_PTS values
+        try (PrintWriter writer = new PrintWriter("output_sample_" + EPS + "_" + MIN_PTS + ".csv")) {
 
             StringBuilder sb = new StringBuilder("Cluster_ID,Longitude,Latitude,Number_Of_Points\n");
 
@@ -227,10 +211,7 @@ public class TaxiClusters {
         } catch (FileNotFoundException e) {
             System.out.println(e.getMessage());
         }
-
-    }
-
+    } // end of createAndWriteToCSV()
 
 
-
-}
+} // end of TaxiClusters.java
