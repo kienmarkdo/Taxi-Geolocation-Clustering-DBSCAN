@@ -27,7 +27,7 @@ public class TaxiClusters {
     static int END_LAT = 13;
 
     // DBSCAN attributes
-    static double EPS = 0.0001; // eps is a distance perimeter, like a radius
+    static double EPS = 0.0003; // eps is a distance perimeter, like a radius
     static int MIN_PTS = 5; // minPts is the min points within EPS such that this radius counts as a cluster
 
     // a list of all TripRecords and Clusters; CLUSTERS will be used to output the CSV file containing all the clusters
@@ -50,7 +50,7 @@ public class TaxiClusters {
             cluster.printCluster();
         }
 
-        taxiClusters.createAndWriteResultsToCSV();
+        //taxiClusters.createAndWriteResultsToCSV();
     }
 
     /**
@@ -96,7 +96,7 @@ public class TaxiClusters {
                 }
             } // end of for loop
 
-            CLUSTERS.add(seedSet);
+            seedSet.createCSV();
 
         } // end of TripRecord for loop
 
@@ -125,7 +125,7 @@ public class TaxiClusters {
             // compute the distance between thisTrip and otherTrip; compare that distance to EPS; EPS is a global variable
             // NOTE -- thisTrip != otherTrip condition in the if statement is NOT the same as the traditional DBSCAN
             //  the actual DBSCAN algorithm counts thisTrip as a neighbouring point to be compared with MIN_PTS
-            if (thisTrip != otherTrip && thisTrip.calculateDistance(otherTrip) <= EPS) {
+            if (thisTrip.calculateDistance(otherTrip) <= EPS) {
                 neighbours.add(otherTrip);
             }
         }

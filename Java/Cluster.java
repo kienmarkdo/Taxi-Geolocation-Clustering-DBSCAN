@@ -1,3 +1,5 @@
+import java.io.FileNotFoundException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -76,6 +78,28 @@ public class Cluster {
         return String.format("%s,%s,%s,%s\n", this.cluster.get(0).getLabel(), this.cluster.get(0).getPickup_Location().getLongitude(),
                 this.cluster.get(0).getPickup_Location().getLatitude(), this.cluster.size());
     } // end of toString()
+
+
+    public void createCSV() {
+        try (PrintWriter writer = new PrintWriter("cluster_" + this.getCluster().get(0).getLabel() + ".csv")) {
+
+            StringBuilder sb = new StringBuilder("Cluster_ID,Longitude,Latitude,Number_Of_Points\n");
+
+            for (int i = 0; i < this.getCluster().size(); i++) {
+                sb.append(
+                        String.format("%s,%s,%s,%s\n", this.cluster.get(i).getLabel(), this.cluster.get(i).getPickup_Location().getLongitude(),
+                                this.cluster.get(i).getPickup_Location().getLatitude(), this.cluster.size())
+                );
+            }
+
+            writer.write(sb.toString());
+
+            System.out.println("done!");
+
+        } catch (FileNotFoundException e) {
+            System.out.println(e.getMessage());
+        }
+    }
 
 
 } // end of Cluster.java
