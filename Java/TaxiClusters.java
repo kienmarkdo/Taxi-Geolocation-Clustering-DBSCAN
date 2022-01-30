@@ -76,25 +76,45 @@ public class TaxiClusters {
             currTrip.setLabel(String.valueOf(clusterCounter));
 
             Cluster seedSet = new Cluster(); // Neighbours to expand
-            seedSet.setCoreTrip(currTrip);
-            seedSet.setSurroundingTrips(neighbours); // setSurroundingTrips remove the core point
-            List<TripRecord> surrSeedTrips = seedSet.getSurroundingTrips();
+//            seedSet.setCoreTrip(currTrip);
+//            seedSet.setSurroundingTrips(neighbours); // setSurroundingTrips remove the core point
+//            List<TripRecord> surrSeedTrips = seedSet.getSurroundingTrips();
 
-            for (int i = 0; i < surrSeedTrips.size(); i++) {
-                if (surrSeedTrips.get(i).getLabel().equals("noise")) {
-                    surrSeedTrips.get(i).setLabel(String.valueOf(clusterCounter));
+            seedSet.cluster.add(currTrip);
+            seedSet.cluster.addAll(neighbours);
+
+            for (int i = 0; i < seedSet.cluster.size(); i++) {
+                if (seedSet.cluster.get(i).getLabel().equals("noise")) {
+                    seedSet.cluster.get(i).setLabel(String.valueOf(clusterCounter));
                 }
-                if (!surrSeedTrips.get(i).getLabel().equals("undefined")) {
+                if (!seedSet.cluster.get(i).getLabel().equals("undefined")) {
                     continue;
                 }
-                surrSeedTrips.get(i).setLabel(String.valueOf(clusterCounter));
-                ArrayList<TripRecord> seedNeighbours = rangeQuery(surrSeedTrips.get(i));
+                seedSet.cluster.get(i).setLabel(String.valueOf(clusterCounter));
+                ArrayList<TripRecord> seedNeighbours = rangeQuery(seedSet.cluster.get(i));
 
                 if (seedNeighbours.size() >= MIN_PTS) {
+                    // seedSet.add(seedNeighbours);
                     seedSet.add(seedNeighbours);
                 }
 
             } // end of for loop
+
+//            for (int i = 0; i < surrSeedTrips.size(); i++) {
+//                if (surrSeedTrips.get(i).getLabel().equals("noise")) {
+//                    surrSeedTrips.get(i).setLabel(String.valueOf(clusterCounter));
+//                }
+//                if (!surrSeedTrips.get(i).getLabel().equals("undefined")) {
+//                    continue;
+//                }
+//                surrSeedTrips.get(i).setLabel(String.valueOf(clusterCounter));
+//                ArrayList<TripRecord> seedNeighbours = rangeQuery(surrSeedTrips.get(i));
+//
+//                if (seedNeighbours.size() >= MIN_PTS) {
+//                    seedSet.add(seedNeighbours);
+//                }
+//
+//            } // end of for loop
 
             CLUSTERS.add(seedSet);
 

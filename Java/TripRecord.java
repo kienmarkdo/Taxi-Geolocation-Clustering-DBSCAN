@@ -51,7 +51,7 @@ public class TripRecord {
     public double calculateDistance(TripRecord otherTrip) {
         return Math.sqrt(
                 Math.pow(this.pickup_Location.getLatitude() - otherTrip.getPickup_Location().getLatitude(), 2) +
-                        Math.pow(this.pickup_Location.getLongitude() - otherTrip.pickup_Location.getLongitude(), 2)
+                        Math.pow(this.pickup_Location.getLongitude() - otherTrip.getPickup_Location().getLongitude(), 2)
         );
     }
 

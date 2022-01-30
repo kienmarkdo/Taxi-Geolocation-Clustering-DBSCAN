@@ -12,6 +12,7 @@ public class GPScoord {
     // =========================== Methods ==========================
 
     // ==== constructors START ====
+
     public GPScoord() {
         this.latitude = -1;
         this.longitude = -1;
@@ -22,6 +23,7 @@ public class GPScoord {
         this.latitude = latitude;
         this.longitude = longitude;
     }
+    
     // ==== constructors END ====
 
     // ==== class methods START ====
