@@ -7,7 +7,7 @@ The following DBSCAN values were used
 - EPS: 0.0003
 - MIN_PTS: 5
 
-The output is in the All_Clusters_0.0003_5 folder.
+The output is in the output folder.
 The output CSV files are named by their cluster ID (in the format of a counter, starting at cluster_1.csv)
 
 The top 10 largest clusters (sort the CSV files by largest size to smallest size in your directory) can then be imported onto Google Maps.
