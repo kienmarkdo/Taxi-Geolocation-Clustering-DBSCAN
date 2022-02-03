@@ -83,8 +83,7 @@ public class TaxiClusters {
             currTrip.setLabel(String.valueOf(clusterCounter));
 
             Cluster seedSet = new Cluster(); // Neighbours to expand
-            seedSet.getCluster().add(currTrip);
-            seedSet.getCluster().addAll(neighbours);
+            seedSet.add(neighbours);
 
             for (int i = 0; i < seedSet.getCluster().size(); i++) {
                 if (seedSet.getCluster().get(i).getLabel().equals("noise")) {
