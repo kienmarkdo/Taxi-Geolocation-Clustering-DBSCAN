@@ -15,6 +15,7 @@ public class Cluster implements Comparable<Cluster> {
     // =========================== Attributes ==========================
 
     private List<TripRecord> cluster; // the 0th index is the core trip/core point of the cluster
+    private TripRecord coreTrip;
 
     // =========================== Methods ==========================
 
@@ -81,7 +82,7 @@ public class Cluster implements Comparable<Cluster> {
      * and the number of points in this cluster. The CSV file is named according to the cluster ID.
      */
     public void createCSV() {
-        try (PrintWriter writer = new PrintWriter("cluster_" + this.getCluster().get(0).getLabel() + ".csv")) {
+        try (PrintWriter writer = new PrintWriter("cluster_" + this.coreTrip.getLabel() + ".csv")) {
 
             StringBuilder sb = new StringBuilder("Cluster_ID,Longitude,Latitude,Number_Of_Points\n");
 
@@ -113,6 +114,13 @@ public class Cluster implements Comparable<Cluster> {
         this.cluster = cluster;
     }
 
+    public TripRecord getCoreTrip() {
+        return coreTrip;
+    }
+
+    public void setCoreTrip(TripRecord coreTrip) {
+        this.coreTrip = coreTrip;
+    }
 
     // ==== getters and setters END ====
 
@@ -123,7 +131,7 @@ public class Cluster implements Comparable<Cluster> {
      */
     @Override
     public String toString() {
-        return String.format("%s,%s,%s,%s\n", this.cluster.get(0).getLabel(), averagePickupCoord().getLongitude(),
+        return String.format("%s,%s,%s,%s\n", this.coreTrip.getLabel(), averagePickupCoord().getLongitude(),
                 averagePickupCoord().getLatitude(), this.cluster.size());
     } // end of toString()
 

@@ -53,7 +53,7 @@ public class TaxiClusters {
 //            cluster.printCluster();
 //        }
 
-        // NOTE : https://stackoverflow.com/questions/34910841/difference-between-collections-sortlist-and-list-sortcomparator
+//        // NOTE : https://stackoverflow.com/questions/34910841/difference-between-collections-sortlist-and-list-sortcomparator
         CLUSTERS.sort(Collections.reverseOrder()); // requires Java 8
         taxiClusters.createAndWriteResultsToCSV();
     }
@@ -83,7 +83,8 @@ public class TaxiClusters {
             currTrip.setLabel(String.valueOf(clusterCounter));
 
             Cluster seedSet = new Cluster(); // Neighbours to expand
-            seedSet.add(neighbours);
+            seedSet.setCoreTrip(currTrip);
+            seedSet.getCluster().addAll(neighbours);
 
             for (int i = 0; i < seedSet.getCluster().size(); i++) {
                 if (seedSet.getCluster().get(i).getLabel().equals("noise")) {
@@ -101,7 +102,7 @@ public class TaxiClusters {
             } // end of for loop
 
             CLUSTERS.add(seedSet); // single CSV file version (each cluster's position is the average of all of its starting points)
-            // seedSet.createCSV(); // multiple CSV file version (one CSV file per cluster; shows all neighbours' starting points)
+            //seedSet.createCSV(); // multiple CSV file version (one CSV file per cluster; shows all neighbours' starting points)
 
         } // end of TripRecord for loop
 
