@@ -1,7 +1,5 @@
 import java.io.*;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 /**
  * Kien Do 300163370
@@ -12,7 +10,7 @@ import java.util.List;
  * its position (average value of the GPS coordinates of its point set) and the number of points it contains.
  * The outlier points are discarded.
  *
- * This version of the program produces a new CSV file for every cluster.
+ * This version of the program produces MULTIPLE CSV files, a new CSV file for every cluster.
  */
 
 public class TaxiClusters {
@@ -51,11 +49,13 @@ public class TaxiClusters {
         taxiClusters.readToTripRecord();
 
         taxiClusters.DBSCAN();
-        for (Cluster cluster : CLUSTERS) {
-            cluster.printCluster();
-        }
+//        for (Cluster cluster : CLUSTERS) {
+//            cluster.printCluster();
+//        }
 
-        //taxiClusters.createAndWriteResultsToCSV();
+//        // NOTE : https://stackoverflow.com/questions/34910841/difference-between-collections-sortlist-and-list-sortcomparator
+//        CLUSTERS.sort(Collections.reverseOrder()); // requires Java 8
+//        taxiClusters.createAndWriteResultsToCSV();
     }
 
     /**
@@ -198,7 +198,7 @@ public class TaxiClusters {
      */
     public void createAndWriteResultsToCSV() {
         // creates the CSV file's name according to its EPS and MIN_PTS values
-        try (PrintWriter writer = new PrintWriter("output_sample_" + EPS + "_" + MIN_PTS + ".csv")) {
+        try (PrintWriter writer = new PrintWriter("output_sample_SORTED_" + EPS + "_" + MIN_PTS + ".csv")) {
 
             StringBuilder sb = new StringBuilder("Cluster_ID,Longitude,Latitude,Number_Of_Points\n");
 
@@ -208,7 +208,7 @@ public class TaxiClusters {
 
             writer.write(sb.toString());
 
-            System.out.println("done!");
+            System.out.println("Create and write output to CSV file done!");
 
         } catch (FileNotFoundException e) {
             System.out.println(e.getMessage());

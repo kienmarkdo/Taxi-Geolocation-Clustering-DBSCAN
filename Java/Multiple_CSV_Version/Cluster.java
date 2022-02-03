@@ -10,7 +10,7 @@ import java.util.List;
  * Cluster class representing ONE cluster of TripRecords.
  */
 
-public class Cluster {
+public class Cluster implements Comparable<Cluster> {
 
     // =========================== Attributes ==========================
 
@@ -43,7 +43,7 @@ public class Cluster {
     }
 
     /**
-     * Adds a set of List<TripRercord> onto the current cluster.
+     * Adds a set of List<TripRecord> onto the current cluster.
      * @param setOfTrips a list of trips which should be the core point's neighbours' neighbours
      */
     public void add(List<TripRecord> setOfTrips) {
@@ -121,10 +121,31 @@ public class Cluster {
      *
      * @return Returns a string of Cluster in CSV format with the comma being the separator.
      */
+    @Override
     public String toString() {
         return String.format("%s,%s,%s,%s\n", this.cluster.get(0).getLabel(), averagePickupCoord().getLongitude(),
                 averagePickupCoord().getLatitude(), this.cluster.size());
     } // end of toString()
 
+
+    /**
+     * compareTo method for Cluster; a method of the interface Comparable
+     * @param other other Cluster object
+     * @return 1 if this cluster's size < other cluster's size; -1 if this cluster's size < other cluster's size; 0 if they are equal
+     */
+    @Override
+    public int compareTo(Cluster other) {
+        if (other == null) {
+            throw new NullPointerException("ERROR : CompareTo() method in Cluster.java received a null value for other cluster.");
+        }
+
+        if (this.getCluster().size() > other.getCluster().size()) {
+            return 1;
+        } else if (this.getCluster().size() < other.getCluster().size()) {
+            return -1;
+        } else {
+            return 0;
+        }
+    } // end of compareTo()
 
 } // end of Cluster.java
