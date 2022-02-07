@@ -61,6 +61,9 @@ public class TaxiClusters {
     /**
      * DBSCAN algorithm used to cluster all the TripRecords together while discarding all TripRecords considered as noise.
      * Does not take EPS and MIN_PTS as parameters because they are global variables.
+     * 
+     * The implementation of this DBSCAN algorithm is based on the pseudocode found in the Wikipedia URL below.
+     * https://en.wikipedia.org/wiki/DBSCAN#Algorithm
      */
     public void DBSCAN() {
         int clusterCounter = 0;
