@@ -16,7 +16,9 @@ The Java application `TaxiClusters.java` produced as output the list of clusters
 <div><img src="https://user-images.githubusercontent.com/67518620/151718993-d012fd6c-64e8-4e44-b4fc-80951ad30d1b.png" width = 100%></div>
 
 ### Version 2: Multiple output (eps = 0.0003, min_pts = 5)
-Instead of producing one single CSV file containing all clusters, this version produces multiple CSV files where each CSV file represents ONE cluster. This version produced 705 clusters (consequently, 705 CSV files). The 10 largest clusters/files are then plotted onto Google Maps, each cluster is marked in a different colour,
+Instead of producing one single CSV file containing all clusters, this version produces multiple CSV files where each CSV file represents ONE cluster. This version produced 705 clusters (consequently, 705 CSV files). The 10 largest clusters/files are then plotted onto Google Maps, each cluster is marked in a different colour.
+
+To view the output image below on Google Maps, [click here](https://www.google.com/maps/d/edit?mid=1NQyUCyEju_fRNNSgHPOevQFdtw9hk-C6&usp=sharing).
 <div><img src="https://user-images.githubusercontent.com/67518620/151680554-3bfaa9ec-5a7e-435e-8e2f-383af0e66cac.png" width="100%"></div>
 
 <!-- ![plottedLocationsGPS](https://user-images.githubusercontent.com/67518620/150623764-db94fc77-e238-46b7-abd5-0b0630aeabb8.png)
