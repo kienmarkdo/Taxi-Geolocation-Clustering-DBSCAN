@@ -124,7 +124,6 @@ func produce(jobs chan<- int, grid *[N][N][]LabelledGPScoord, j int, wg *sync.Wa
 	for i := 0; i < N; i++ {
 		jobs <- DBscan(&grid[i][j], MinPts, eps, i*10000000+j*1000000)
 	}
-	close(jobs)
 
 }
 
