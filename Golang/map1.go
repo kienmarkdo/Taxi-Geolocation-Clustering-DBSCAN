@@ -11,6 +11,7 @@ import (
 	"math"
 	"os"
 	"strconv"
+	"sync"
 	"time"
 )
 
@@ -87,17 +88,27 @@ func main() {
 	// Learned about the producer-worker pattern / worker-jobs pattern from here: https://betterprogramming.pub/hands-on-go-concurrency-the-producer-consumer-pattern-c42aab4e3bd2
 	// Implemented using Single/Multiple Producer Multiple Consumer variation
 	const consumerCount = 4
+	const producerCount = N
 
 	jobs := make(chan int)
-	done := make(chan bool)
+	//done := make(chan bool)
+	wp := &sync.WaitGroup{}
+	wc := &sync.WaitGroup{}
 
-	go produce(jobs, &grid)
+	wp.Add(producerCount)
+	wc.Add(consumerCount)
 
-	for i := 0; i < consumerCount; i++ {
-		go consume(i, jobs, done)
+	for j := 0; j < producerCount; j++ {
+		go produce(jobs, &grid, j, wp)
 	}
 
-	<-done
+	for i := 0; i < consumerCount; i++ {
+		go consume(jobs, &grid, wc)
+	}
+
+	wp.Wait()
+	close(jobs)
+	wc.Wait()
 
 	// Parallel DBSCAN step 3.
 	// merge clusters
@@ -107,21 +118,21 @@ func main() {
 	fmt.Printf("\nExecution time: %s of %d points\n", end.Sub(start), partitionSize)
 }
 
-func produce(jobs chan<- int, grid *[N][N][]LabelledGPScoord) {
-	for j := 0; j < N; j++ {
-		for i := 0; i < N; i++ {
-			jobs <- DBscan(&grid[i][j], MinPts, eps, i*10000000+j*1000000)
-		}
+func produce(jobs chan<- int, grid *[N][N][]LabelledGPScoord, j int, wg *sync.WaitGroup) {
+	defer wg.Done()
+
+	for i := 0; i < N; i++ {
+		jobs <- DBscan(&grid[i][j], MinPts, eps, i*10000000+j*1000000)
 	}
 	close(jobs)
 
 }
 
-func consume(worker int, jobs <-chan int, done chan<- bool) {
-	for numClusters := range jobs {
-		fmt.Println(numClusters)
+func consume(jobs <-chan int, grid *[N][N][]LabelledGPScoord, wg *sync.WaitGroup) {
+	defer wg.Done()
+	for range jobs {
+		<-jobs
 	}
-	done <- true
 }
 
 // Applies DBSCAN algorithm on LabelledGPScoord points
