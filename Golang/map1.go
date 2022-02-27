@@ -94,35 +94,32 @@ func main() {
 	// wp := &sync.WaitGroup{}
 	// wc := &sync.WaitGroup{}
 	wp := make(chan bool)
-	wc := make(chan bool)
+	//wc := make(chan bool)
 
 	// wp.Add(producerCount)
 	// wc.Add(consumerCount)
 
-	for j := 0; j < producerCount; j++ {
-		go produce(jobs, &grid, j, wp)
+	// for j := 0; j < producerCount; j++ {
+	// 	go produce(jobs, &grid, j, wp)
+	// }
+	for j := 0; j < N; j++ {
+		for i := 0; i < N; i++ {
+			go produce(jobs, &grid, j, i, wp)
+		}
 	}
 
 	for i := 0; i < consumerCount; i++ {
-		go consume(jobs, &grid, wc)
+		go consume(jobs)
 	}
 
 	//wp.Wait()
-	// for i := 0; i < producerCount; i++ {
-	// 	<-wp // Blocks waiting for a receive
-	// }
-	// close(jobs)
+	for i := 0; i < producerCount; i++ {
+		<-wp // Blocks waiting for a receive
+	}
+	close(jobs)
 	// for i := 0; i < consumerCount; i++ {
 	// 	<-wc // Blocks waiting for a receive
 	// }
-	for {
-		select {
-		case <-wp:
-			continue
-		case <-wc:
-			continue
-		}
-	}
 	//wc.Wait()
 
 	// Parallel DBSCAN step 3.
@@ -133,17 +130,16 @@ func main() {
 	fmt.Printf("\nExecution time: %s of %d points\n", end.Sub(start), partitionSize)
 }
 
-func produce(jobs chan<- int, grid *[N][N][]LabelledGPScoord, j int, wg chan bool) {
+func produce(jobs chan<- int, grid *[N][N][]LabelledGPScoord, j int, i int, wg chan bool) {
 	//defer wg.Done()
 
-	for i := 0; i < N; i++ {
-		jobs <- DBscan(&grid[i][j], MinPts, eps, i*10000000+j*1000000)
-	}
+	jobs <- DBscan(&grid[i][j], MinPts, eps, i*10000000+j*1000000)
+
 	close(jobs)
 
 }
 
-func consume(jobs <-chan int, grid *[N][N][]LabelledGPScoord, wg chan bool) {
+func consume(jobs <-chan int) {
 	//defer wg.Done()
 	for range jobs {
 		<-jobs
