@@ -11,7 +11,6 @@ import (
 	"math"
 	"os"
 	"strconv"
-	"sync"
 	"time"
 )
 
@@ -77,16 +76,16 @@ func main() {
 	// This is the non-concurrent procedural version
 	// It should be replaced by a producer thread that produces jobs (partition to be clustered)
 	// And by consumer threads that clusters partitions
-	for j := 0; j < N; j++ {
-		for i := 0; i < N; i++ {
-
-			DBscan(&grid[i][j], MinPts, eps, i*10000000+j*1000000)
-		}
-	}
+	// for j := 0; j < N; j++ {
+	// 	for i := 0; i < N; i++ {
+	// 		DBscan(&grid[i][j], MinPts, eps, i*10000000+j*1000000)
+	// 	}
+	// }
 
 	// Parallel DBSCAN STEP 2.
 	// Apply DBSCAN on each partition
 	// Learned about the producer-worker pattern / worker-jobs pattern from here: https://betterprogramming.pub/hands-on-go-concurrency-the-producer-consumer-pattern-c42aab4e3bd2
+	// Implemented using Single/Multiple Producer Multiple Consumer variation
 	// ...
 
 	// Parallel DBSCAN step 3.
@@ -95,21 +94,6 @@ func main() {
 
 	end := time.Now()
 	fmt.Printf("\nExecution time: %s of %d points\n", end.Sub(start), partitionSize)
-}
-
-func produce(jobs chan<- string, idx int, wg *sync.WaitGroup) {
-	defer wg.Done()
-	for _, msg := range messages[idx] {
-		fmt.Printf("Producer %v sending message \"%v\"\n", idx, msg)
-		jobs <- msg
-	}
-}
-
-func consume(jobs <-chan string, done chan<- bool) {
-	for msg := range jobs {
-		fmt.Printf("Consumed message \"%v\"\n", msg)
-	}
-	done <- true
 }
 
 // Applies DBSCAN algorithm on LabelledGPScoord points
