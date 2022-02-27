@@ -86,7 +86,18 @@ func main() {
 	// Apply DBSCAN on each partition
 	// Learned about the producer-worker pattern / worker-jobs pattern from here: https://betterprogramming.pub/hands-on-go-concurrency-the-producer-consumer-pattern-c42aab4e3bd2
 	// Implemented using Single/Multiple Producer Multiple Consumer variation
-	// ...
+	const consumerCount = 4
+
+	jobs := make(chan int)
+	done := make(chan bool)
+
+	go produce(jobs, &grid)
+
+	for i := 0; i < consumerCount; i++ {
+		go consume(i, jobs, done)
+	}
+
+	<-done
 
 	// Parallel DBSCAN step 3.
 	// merge clusters
@@ -94,6 +105,23 @@ func main() {
 
 	end := time.Now()
 	fmt.Printf("\nExecution time: %s of %d points\n", end.Sub(start), partitionSize)
+}
+
+func produce(jobs chan<- int, grid *[N][N][]LabelledGPScoord) {
+	for j := 0; j < N; j++ {
+		for i := 0; i < N; i++ {
+			jobs <- DBscan(&grid[i][j], MinPts, eps, i*10000000+j*1000000)
+		}
+	}
+	close(jobs)
+
+}
+
+func consume(worker int, jobs <-chan int, done chan<- bool) {
+	for numClusters := range jobs {
+		fmt.Println(numClusters)
+	}
+	done <- true
 }
 
 // Applies DBSCAN algorithm on LabelledGPScoord points
