@@ -108,12 +108,20 @@ func main() {
 	}
 
 	//wp.Wait()
-	for i := 0; i < producerCount; i++ {
-		<-wp // Blocks waiting for a receive
-	}
-	close(jobs)
-	for i := 0; i < consumerCount; i++ {
-		<-wc // Blocks waiting for a receive
+	// for i := 0; i < producerCount; i++ {
+	// 	<-wp // Blocks waiting for a receive
+	// }
+	// close(jobs)
+	// for i := 0; i < consumerCount; i++ {
+	// 	<-wc // Blocks waiting for a receive
+	// }
+	for {
+		select {
+		case <-wp:
+			continue
+		case <-wc:
+			continue
+		}
 	}
 	//wc.Wait()
 
