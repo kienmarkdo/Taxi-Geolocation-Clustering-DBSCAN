@@ -11,7 +11,6 @@ import (
 	"math"
 	"os"
 	"strconv"
-	"sync"
 	"time"
 )
 
@@ -92,11 +91,13 @@ func main() {
 
 	jobs := make(chan int)
 	//done := make(chan bool)
-	wp := &sync.WaitGroup{}
-	wc := &sync.WaitGroup{}
+	// wp := &sync.WaitGroup{}
+	// wc := &sync.WaitGroup{}
+	wp := make(chan bool)
+	wc := make(chan bool)
 
-	wp.Add(producerCount)
-	wc.Add(consumerCount)
+	// wp.Add(producerCount)
+	// wc.Add(consumerCount)
 
 	for j := 0; j < producerCount; j++ {
 		go produce(jobs, &grid, j, wp)
@@ -106,9 +107,15 @@ func main() {
 		go consume(jobs, &grid, wc)
 	}
 
-	wp.Wait()
+	//wp.Wait()
+	for i := 0; i < producerCount; i++ {
+		<-wp // Blocks waiting for a receive
+	}
 	close(jobs)
-	wc.Wait()
+	for i := 0; i < consumerCount; i++ {
+		<-wc // Blocks waiting for a receive
+	}
+	//wc.Wait()
 
 	// Parallel DBSCAN step 3.
 	// merge clusters
@@ -118,8 +125,8 @@ func main() {
 	fmt.Printf("\nExecution time: %s of %d points\n", end.Sub(start), partitionSize)
 }
 
-func produce(jobs chan<- int, grid *[N][N][]LabelledGPScoord, j int, wg *sync.WaitGroup) {
-	defer wg.Done()
+func produce(jobs chan<- int, grid *[N][N][]LabelledGPScoord, j int, wg chan bool) {
+	//defer wg.Done()
 
 	for i := 0; i < N; i++ {
 		jobs <- DBscan(&grid[i][j], MinPts, eps, i*10000000+j*1000000)
@@ -128,8 +135,8 @@ func produce(jobs chan<- int, grid *[N][N][]LabelledGPScoord, j int, wg *sync.Wa
 
 }
 
-func consume(jobs <-chan int, grid *[N][N][]LabelledGPScoord, wg *sync.WaitGroup) {
-	defer wg.Done()
+func consume(jobs <-chan int, grid *[N][N][]LabelledGPScoord, wg chan bool) {
+	//defer wg.Done()
 	for range jobs {
 		<-jobs
 	}
