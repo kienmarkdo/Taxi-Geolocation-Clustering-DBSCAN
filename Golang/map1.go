@@ -11,6 +11,7 @@ import (
 	"math"
 	"os"
 	"strconv"
+	"sync"
 	"time"
 )
 
@@ -79,12 +80,13 @@ func main() {
 	for j := 0; j < N; j++ {
 		for i := 0; i < N; i++ {
 
-			DBscan(grid[i][j], MinPts, eps, i*10000000+j*1000000)
+			DBscan(&grid[i][j], MinPts, eps, i*10000000+j*1000000)
 		}
 	}
 
 	// Parallel DBSCAN STEP 2.
 	// Apply DBSCAN on each partition
+	// Learned about the producer-worker pattern / worker-jobs pattern from here: https://betterprogramming.pub/hands-on-go-concurrency-the-producer-consumer-pattern-c42aab4e3bd2
 	// ...
 
 	// Parallel DBSCAN step 3.
@@ -95,16 +97,31 @@ func main() {
 	fmt.Printf("\nExecution time: %s of %d points\n", end.Sub(start), partitionSize)
 }
 
+func produce(jobs chan<- string, idx int, wg *sync.WaitGroup) {
+	defer wg.Done()
+	for _, msg := range messages[idx] {
+		fmt.Printf("Producer %v sending message \"%v\"\n", idx, msg)
+		jobs <- msg
+	}
+}
+
+func consume(jobs <-chan string, done chan<- bool) {
+	for msg := range jobs {
+		fmt.Printf("Consumed message \"%v\"\n", msg)
+	}
+	done <- true
+}
+
 // Applies DBSCAN algorithm on LabelledGPScoord points
 // LabelledGPScoord: the slice of LabelledGPScoord points
 // MinPts, eps: parameters for the DBSCAN algorithm
 // offset: label of first cluster (also used to identify the cluster)
 // returns number of clusters found
-func DBscan(coords []LabelledGPScoord, MinPts int, eps float64, offset int) (nclusters int) {
+func DBscan(coords *[]LabelledGPScoord, MinPts int, eps float64, offset int) (nclusters int) {
 
 	nclusters = 0
 
-	for _, currTrip := range coords {
+	for _, currTrip := range *coords {
 		if currTrip.Label != 0 { // if label is undefined
 			continue
 		}
@@ -122,7 +139,7 @@ func DBscan(coords []LabelledGPScoord, MinPts int, eps float64, offset int) (ncl
 
 		var seedSet []LabelledGPScoord      // Neighbours to expand
 		seedSet = append(seedSet, currTrip) // set core trip
-		addToSeed(seedSet, neighbours)
+		addToSeed(&seedSet, neighbours)
 
 		for i := 0; i < len(seedSet); i++ {
 			if seedSet[i].Label == -1 { // if label is noise
@@ -135,7 +152,7 @@ func DBscan(coords []LabelledGPScoord, MinPts int, eps float64, offset int) (ncl
 			seedNeighbours := rangeQuery(coords, seedSet[i], eps)
 
 			if len(seedNeighbours) >= MinPts {
-				addToSeed(seedSet, seedNeighbours)
+				addToSeed(&seedSet, seedNeighbours)
 			}
 
 		} // end of inner for loop
@@ -144,18 +161,18 @@ func DBscan(coords []LabelledGPScoord, MinPts int, eps float64, offset int) (ncl
 
 	// End of DBscan function
 	// Printing the result (do not remove)
-	fmt.Printf("Partition %10d : [%4d,%6d]\n", offset, nclusters, len(coords))
+	fmt.Printf("Partition %10d : [%4d,%6d]\n", offset, nclusters, len(*coords))
 
 	return nclusters
 }
 
 // Scans the database and returns a list of neighbouring LabelledGPScoords within the eps radius around a given LabelledGPScoord.
 // This is a helper function to DBSCAN.
-func rangeQuery(db []LabelledGPScoord, currCoord LabelledGPScoord, eps float64) []LabelledGPScoord {
+func rangeQuery(db *[]LabelledGPScoord, currCoord LabelledGPScoord, eps float64) []LabelledGPScoord {
 
 	var neighbours []LabelledGPScoord
 
-	for _, otherTrip := range db {
+	for _, otherTrip := range *db {
 		if calculateDistance(currCoord, otherTrip) <= eps {
 			neighbours = append(neighbours, otherTrip)
 		}
@@ -170,17 +187,17 @@ func calculateDistance(c1 LabelledGPScoord, c2 LabelledGPScoord) float64 {
 }
 
 // Adds a set of LabelledGPScoord onto the current cluster.
-func addToSeed(seedSet []LabelledGPScoord, neighbours []LabelledGPScoord) {
+func addToSeed(seedSet *[]LabelledGPScoord, neighbours []LabelledGPScoord) {
 	for _, newTrip := range neighbours {
 		if !contains(seedSet, newTrip) {
-			seedSet = append(seedSet, newTrip)
+			*seedSet = append(*seedSet, newTrip)
 		}
 	}
 }
 
 // Returns true if a coordinate is in a list of LabelledGPScoords
-func contains(coordsList []LabelledGPScoord, coord LabelledGPScoord) bool {
-	for _, curr := range coordsList {
+func contains(coordsList *[]LabelledGPScoord, coord LabelledGPScoord) bool {
+	for _, curr := range *coordsList {
 		if coord == curr {
 			return true
 		}
