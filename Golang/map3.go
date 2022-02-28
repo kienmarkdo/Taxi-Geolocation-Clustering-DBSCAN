@@ -32,7 +32,22 @@ type Job struct {
 	offset int
 }
 
-const consumerCount = 4
+// Utilisation d'une semaphore pour la synchronisation
+type semaphore chan bool
+
+// fonction qui va attendre toutes les go routines
+func (s semaphore) Wait(n int) {
+	for i := 0; i < n; i++ {
+		<-s
+	}
+}
+
+// fonction qui signale la fin d'une go routine
+func (s semaphore) Signal() {
+	s <- true
+}
+
+const ConsumerCount = 4
 const N int = 4
 const MinPts int = 5
 const eps float64 = 0.0003
@@ -81,12 +96,12 @@ func main() {
 	// This is the non-concurrent procedural version
 	// It should be replaced by a producer thread that produces jobs (partition to be clustered)
 	// And by consumer threads that clusters partitions
-	for j := 0; j < N; j++ {
-		for i := 0; i < N; i++ {
+	// for j := 0; j < N; j++ {
+	// 	for i := 0; i < N; i++ {
 
-			DBscan(grid[i][j], MinPts, eps, i*10000000+j*1000000)
-		}
-	}
+	// 		DBscan(grid[i][j], MinPts, eps, i*10000000+j*1000000)
+	// 	}
+	// }
 
 	// Parallel DBSCAN STEP 2.
 	// Apply DBSCAN on each partition
@@ -103,6 +118,22 @@ func main() {
 	// j = 3
 	// DBscan(grid[i][j], MinPts, eps, i*10000000+j*1000000)
 
+	jobs := make(chan Job, N*N)
+	mutex := make(semaphore, N*N)
+
+	for i := 0; i < ConsumerCount; i++ {
+		go consume(jobs, mutex)
+	}
+
+	for j := 0; j < N; j++ {
+		for i := 0; i < N; i++ {
+			jobs <- Job{grid[i][j], MinPts, eps, i*10000000 + j*1000000}
+		}
+	}
+
+	close(jobs)
+	mutex.Wait(ConsumerCount)
+
 	// Parallel DBSCAN step 3.
 	// merge clusters
 	// *DO NOT PROGRAM THIS STEP
@@ -111,8 +142,18 @@ func main() {
 	fmt.Printf("\nExecution time: %s of %d points\n", end.Sub(start), partitionSize)
 }
 
-func consumer() {
+func consume(jobs <-chan Job, sem semaphore) {
 
+	for {
+		j, more := <-jobs
+
+		if more {
+			DBscan(j.coords, j.minPts, j.eps, j.offset)
+		} else {
+			sem.Signal()
+			return
+		}
+	}
 }
 
 // Applies DBSCAN algorithm on LabelledGPScoord points
