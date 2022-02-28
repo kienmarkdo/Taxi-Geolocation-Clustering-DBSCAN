@@ -19,7 +19,7 @@ The project is implemented in four programming languages and paradigms:
 ## Dataset
 The dataset is taken from NYC's 2009 taxi database that recorded taxi trips spanning a certain timeframe on January 15, 2009. The dataset is contained in a CSV file, with each line corresponding to a trip record and the columns representing the relevant attributes of each trip. Since we want to identify the best waiting areas, we are interested in the starting points. As such, the dataset includes the GPS coordinates of the start and end point for each taxi trip.
 
-The image below is an example of a visualization of the plotted GPS coordinates of the NYC taxi dataset from the [Java](/Java) version of this project, spanning 1 hour on January 15, 2009, and containing 21,232 points. Note that each of the four implementations of this project uses a different sized dataset (for example, the [Golang](\Golang) version uses the same dataset, but spanning 12 hours and contains 232,051 points instead)
+The image below is an example of a visualization of the plotted GPS coordinates of the NYC taxi dataset from the [Java](/Java) version of this project, spanning 1 hour on January 15, 2009, and containing **_21,232 points_**. Note that each of the four implementations of this project uses a different sized dataset (for example, the [Golang](\Golang) version uses the same dataset, but spanning 12 hours and contains **_232,051 points_** instead)
 
 _Disclaimer: Google Maps has a cap at 2,000 markers per layer. As such, not all points are plotted as the dataset contains 21,232 points._
 
