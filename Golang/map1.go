@@ -11,7 +11,6 @@ import (
 	"math"
 	"os"
 	"strconv"
-	"sync"
 	"time"
 )
 
@@ -24,6 +23,28 @@ type LabelledGPScoord struct {
 	GPScoord
 	ID    int // point ID
 	Label int // cluster ID => 0 = undefined, -1 = noise
+}
+
+type Job struct {
+	coords []LabelledGPScoord
+	minPts int
+	eps    float64
+	offset int
+}
+
+// Utilisation d'une semaphore pour la synchronisation
+type semaphore chan bool
+
+// fonction qui va attendre toutes les go routines
+func (s semaphore) Wait(n int) {
+	for i := 0; i < n; i++ {
+		<-s
+	}
+}
+
+// fonction qui signale la fin d'une go routine
+func (s semaphore) Signal() {
+	s <- true
 }
 
 const N int = 4
@@ -90,25 +111,21 @@ func main() {
 	const consumerCount = 4
 	const producerCount = N
 
-	jobs := make(chan int)
-	//done := make(chan bool)
-	wp := &sync.WaitGroup{}
-	wc := &sync.WaitGroup{}
-
-	wp.Add(producerCount)
-	wc.Add(consumerCount)
-
-	for j := 0; j < N; j++ {
-		go produce(jobs, &grid, j, wp)
-	}
+	jobs := make(chan Job, N*N)
+	mutex := make(semaphore, N*N)
 
 	for i := 0; i < consumerCount; i++ {
-		go consume(jobs, wc)
+		go consume(jobs, mutex)
 	}
 
-	wp.Wait()
+	for j := 0; j < N; j++ {
+		for i := 0; i < N; i++ {
+			jobs <- Job{grid[i][j], MinPts, eps, i*10000000 + j*1000000}
+		}
+	}
+
 	close(jobs)
-	wc.Wait()
+	mutex.Wait(consumerCount)
 
 	// Parallel DBSCAN step 3.
 	// merge clusters
@@ -118,19 +135,29 @@ func main() {
 	fmt.Printf("\nExecution time: %s of %d points\n", end.Sub(start), partitionSize)
 }
 
-func produce(jobs chan<- int, grid *[N][N][]LabelledGPScoord, j int, wg *sync.WaitGroup) {
-	defer wg.Done()
+// func produce(jobs chan<- Job, grid *[N][N][]LabelledGPScoord, wg *sync.WaitGroup) {
+// 	defer wg.Done()
 
-	for i := 0; i < N; i++ {
-		jobs <- DBscan(&grid[i][j], MinPts, eps, i*10000000+j*1000000)
-	}
+// 	for j := 0; j < N; j++ {
+// 		for i := 0; i < N; i++ {
+// 			jobs <- Job{grid[i][j], MinPts, eps, i*10000000 + j*1000000}
+// 			//jobs <- DBscan(&grid[i][j], MinPts, eps, i*10000000+j*1000000)
+// 		}
+// 	}
 
-}
+// }
 
-func consume(jobs <-chan int, wg *sync.WaitGroup) {
-	defer wg.Done()
-	for range jobs {
-		<-jobs
+func consume(jobs <-chan Job, sem semaphore) {
+
+	for {
+		j, more := <-jobs
+
+		if more {
+			DBscan(&j.coords, j.minPts, j.eps, j.offset)
+		} else {
+			sem.Signal()
+			return
+		}
 	}
 }
 
@@ -223,7 +250,7 @@ func removeDuplicateGPS(strSlice []LabelledGPScoord) []LabelledGPScoord {
 	return list
 }
 
-// Adds a set of LabelledGPScoord onto the current cluster.
+// // Adds a set of LabelledGPScoord onto the current cluster.
 // func addToSeed(seedSet *[]LabelledGPScoord, neighbours []LabelledGPScoord) {
 // 	for _, newTrip := range neighbours {
 // 		if !contains(seedSet, newTrip) {
@@ -232,7 +259,7 @@ func removeDuplicateGPS(strSlice []LabelledGPScoord) []LabelledGPScoord {
 // 	}
 // }
 
-// Returns true if a coordinate is in a list of LabelledGPScoords
+// // Returns true if a coordinate is in a list of LabelledGPScoords
 // func contains(coordsList *[]LabelledGPScoord, coord LabelledGPScoord) bool {
 // 	for _, curr := range *coordsList {
 // 		if coord == curr {
