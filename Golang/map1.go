@@ -98,12 +98,12 @@ func main() {
 	wp.Add(producerCount)
 	wc.Add(consumerCount)
 
-	for j := 0; j < producerCount; j++ {
+	for j := 0; j < N; j++ {
 		go produce(jobs, &grid, j, wp)
 	}
 
 	for i := 0; i < consumerCount; i++ {
-		go consume(jobs, &grid, wc)
+		go consume(jobs, wc)
 	}
 
 	wp.Wait()
@@ -127,7 +127,7 @@ func produce(jobs chan<- int, grid *[N][N][]LabelledGPScoord, j int, wg *sync.Wa
 
 }
 
-func consume(jobs <-chan int, grid *[N][N][]LabelledGPScoord, wg *sync.WaitGroup) {
+func consume(jobs <-chan int, wg *sync.WaitGroup) {
 	defer wg.Done()
 	for range jobs {
 		<-jobs
