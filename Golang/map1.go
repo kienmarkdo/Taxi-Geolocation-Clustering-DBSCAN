@@ -170,21 +170,22 @@ func DBscan(coords *[]LabelledGPScoord, MinPts int, eps float64, offset int) (nc
 
 	nclusters = 0
 
-	for _, currTrip := range *coords {
-		if currTrip.Label != 0 { // if label is undefined
+	for i := range *coords {
+		// current trip is (*coords)[i]
+		if (*coords)[i].Label != 0 { // if label is undefined
 			continue
 		}
 
-		neighbours := rangeQuery(coords, currTrip, eps)
+		neighbours := rangeQuery(coords, (*coords)[i], eps)
 
 		if len(neighbours) < MinPts {
-			currTrip.Label = -1 // if label is noise
+			(*coords)[i].Label = -1 // if label is noise
 			continue
 		}
 
 		nclusters++
 
-		currTrip.Label = offset + nclusters
+		(*coords)[i].Label = offset + nclusters
 
 		var seedSet []LabelledGPScoord // Neighbours to expand
 		//seedSet = append(seedSet, currTrip) // set core trip
@@ -210,6 +211,47 @@ func DBscan(coords *[]LabelledGPScoord, MinPts int, eps float64, offset int) (nc
 		} // end of inner for loop
 
 	} // end of coords (outer) for loop
+
+	// for _, currTrip := range *coords {
+	// 	if currTrip.Label != 0 { // if label is undefined
+	// 		continue
+	// 	}
+
+	// 	neighbours := rangeQuery(coords, currTrip, eps)
+
+	// 	if len(neighbours) < MinPts {
+	// 		currTrip.Label = -1 // if label is noise
+	// 		continue
+	// 	}
+
+	// 	nclusters++
+
+	// 	currTrip.Label = offset + nclusters
+
+	// 	var seedSet []LabelledGPScoord // Neighbours to expand
+	// 	//seedSet = append(seedSet, currTrip) // set core trip
+	// 	//addToSeed(&seedSet, neighbours)
+	// 	seedSet = append(seedSet, neighbours...)
+
+	// 	for i := 0; i < len(seedSet); i++ {
+	// 		if seedSet[i].Label == -1 { // if label is noise
+	// 			seedSet[i].Label = nclusters
+	// 		}
+	// 		if seedSet[i].Label != 0 { // if label is undefined
+	// 			continue
+	// 		}
+	// 		seedSet[i].Label = nclusters
+	// 		seedNeighbours := rangeQuery(coords, seedSet[i], eps)
+
+	// 		if len(seedNeighbours) >= MinPts {
+	// 			//addToSeed(&seedSet, seedNeighbours)
+	// 			seedSet = append(seedSet, neighbours...)
+	// 			seedSet = removeDuplicateGPS(seedSet)
+	// 		}
+
+	// 	} // end of inner for loop
+
+	// } // end of coords (outer) for loop
 
 	// End of DBscan function
 	// Printing the result (do not remove)
