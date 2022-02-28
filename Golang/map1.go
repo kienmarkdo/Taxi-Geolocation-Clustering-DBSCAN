@@ -47,6 +47,7 @@ func (s semaphore) Signal() {
 	s <- true
 }
 
+const ConsumerCount int = 4
 const N int = 4
 const MinPts int = 5
 const eps float64 = 0.0003
@@ -108,13 +109,13 @@ func main() {
 	// Apply DBSCAN on each partition
 	// Learned about the producer-worker pattern / worker-jobs pattern from here: https://betterprogramming.pub/hands-on-go-concurrency-the-producer-consumer-pattern-c42aab4e3bd2
 	// Implemented using Single/Multiple Producer Multiple Consumer variation
-	const consumerCount = 4
+
 	const producerCount = N
 
 	jobs := make(chan Job, N*N)
 	mutex := make(semaphore, N*N)
 
-	for i := 0; i < consumerCount; i++ {
+	for i := 0; i < ConsumerCount; i++ {
 		go consume(jobs, mutex)
 	}
 
@@ -125,7 +126,7 @@ func main() {
 	}
 
 	close(jobs)
-	mutex.Wait(consumerCount)
+	mutex.Wait(ConsumerCount)
 
 	// Parallel DBSCAN step 3.
 	// merge clusters
@@ -190,7 +191,7 @@ func DBscan(coords *[]LabelledGPScoord, MinPts int, eps float64, offset int) (nc
 		var seedSet []LabelledGPScoord // Neighbours to expand
 		//seedSet = append(seedSet, currTrip) // set core trip
 		//addToSeed(&seedSet, neighbours)
-		seedSet = append(seedSet, neighbours...)
+		//seedSet = append(seedSet, neighbours...)
 
 		for i := 0; i < len(seedSet); i++ {
 			if seedSet[i].Label == -1 { // if label is noise
@@ -204,8 +205,8 @@ func DBscan(coords *[]LabelledGPScoord, MinPts int, eps float64, offset int) (nc
 
 			if len(seedNeighbours) >= MinPts {
 				//addToSeed(&seedSet, seedNeighbours)
-				seedSet = append(seedSet, neighbours...)
-				seedSet = removeDuplicateGPS(seedSet)
+				// seedSet = append(seedSet, neighbours...)
+				// seedSet = removeDuplicateGPS(seedSet)
 			}
 
 		} // end of inner for loop
