@@ -1,4 +1,3 @@
-PS C:\Users\trann\Downloads\Taxi-Location-Prediction-by-Geolocation-Clustering\Golang> go run map3.go
 Number of points: 232050
 NW:(40.700000 , -74.000000)
 SE:(40.800000 , -73.930000)

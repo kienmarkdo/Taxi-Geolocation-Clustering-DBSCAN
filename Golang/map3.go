@@ -118,8 +118,10 @@ func main() {
 	// j = 3
 	// DBscan(grid[i][j], MinPts, eps, i*10000000+j*1000000)
 
-	jobs := make(chan Job, N*N)
-	mutex := make(semaphore, N*N)
+	jobs := make(chan Job)
+	mutex := make(semaphore)
+
+	fmt.Printf("N = %d and %d consumer threads.\n\n", N, ConsumerCount)
 
 	for i := 0; i < ConsumerCount; i++ {
 		go consume(jobs, mutex)
@@ -148,7 +150,7 @@ func consume(jobs <-chan Job, sem semaphore) {
 		j, more := <-jobs
 
 		if more {
-			DBscan(j.coords, j.minPts, j.eps, j.offset)
+			DBscan(&j.coords, j.minPts, j.eps, j.offset)
 		} else {
 			sem.Signal()
 			return
@@ -161,24 +163,24 @@ func consume(jobs <-chan Job, sem semaphore) {
 // MinPts, eps: parameters for the DBSCAN algorithm
 // offset: label of first cluster (also used to identify the cluster)
 // returns number of clusters found
-func DBscan(coords []LabelledGPScoord, MinPts int, eps float64, offset int) (nclusters int) {
+func DBscan(coords *[]LabelledGPScoord, MinPts int, eps float64, offset int) (nclusters int) {
 
 	nclusters = 0
 
-	for p := 0; p < len(coords); p++ {
-		if (coords)[p].Label != 0 { // undefined
+	for p := 0; p < len(*coords); p++ {
+		if (*coords)[p].Label != 0 { // undefined
 			continue
 		}
 
-		neighbours := rangeQuery(coords, (coords)[p], eps)
+		neighbours := rangeQuery(*coords, (*coords)[p], eps)
 
 		if len(neighbours) < MinPts {
-			(coords)[p].Label = -1 // noise
+			(*coords)[p].Label = -1 // noise
 			continue
 		}
 
 		nclusters++
-		(coords)[p].Label = nclusters + offset
+		(*coords)[p].Label = nclusters + offset
 
 		var seedSet []*LabelledGPScoord
 		seedSet = append(seedSet, neighbours...)
@@ -194,7 +196,7 @@ func DBscan(coords []LabelledGPScoord, MinPts int, eps float64, offset int) (ncl
 
 			seedSet[q].Label = nclusters + offset
 
-			seedNeighbours := rangeQuery(coords, *seedSet[q], eps)
+			seedNeighbours := rangeQuery(*coords, *seedSet[q], eps)
 			if len(seedNeighbours) >= MinPts {
 				// addNeighbours(&seedSet, seedNeighbours)
 				seedSet = append(seedSet, seedNeighbours...)
@@ -206,7 +208,7 @@ func DBscan(coords []LabelledGPScoord, MinPts int, eps float64, offset int) (ncl
 	} // end of outer for loop
 
 	// Printing the result (do not remove)
-	fmt.Printf("Partition %10d : [%4d,%6d]\n", offset, nclusters, len(coords))
+	fmt.Printf("Partition %10d : [%4d,%6d]\n", offset, nclusters, len(*coords))
 
 	return nclusters
 }
@@ -227,22 +229,22 @@ func calculateDistance(p1 LabelledGPScoord, p2 LabelledGPScoord) float64 {
 	return math.Sqrt((p1.lat-p2.lat)*(p1.lat-p2.lat) + (p1.long-p2.long)*(p1.long-p2.long))
 }
 
-func addNeighbours(seed *[]LabelledGPScoord, neighbours []LabelledGPScoord) {
-	for i := range neighbours {
-		if !contains(*seed, neighbours[i]) {
-			*seed = append(*seed, neighbours[i])
-		}
-	}
-}
+// func addNeighbours(seed *[]LabelledGPScoord, neighbours []LabelledGPScoord) {
+// 	for i := range neighbours {
+// 		if !contains(*seed, neighbours[i]) {
+// 			*seed = append(*seed, neighbours[i])
+// 		}
+// 	}
+// }
 
-func contains(seed []LabelledGPScoord, point LabelledGPScoord) bool {
-	for i := range seed {
-		if seed[i] == point {
-			return true
-		}
-	}
-	return false
-}
+// func contains(seed []LabelledGPScoord, point LabelledGPScoord) bool {
+// 	for i := range seed {
+// 		if seed[i] == point {
+// 			return true
+// 		}
+// 	}
+// 	return false
+// }
 
 func removeDuplicateGPS(gpsSlice []*LabelledGPScoord) []*LabelledGPScoord {
 	allKeys := make(map[LabelledGPScoord]bool)
