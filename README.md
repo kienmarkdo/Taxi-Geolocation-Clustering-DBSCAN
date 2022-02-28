@@ -16,11 +16,20 @@ The project is implemented in four programming languages and paradigms:
   - logical programming (Prolog)
   - functional programming (Scheme)
 
-## Dataset and Results
-Each of the four versions of this project uses a different dataset and produces different results based on each paradigms' strengths.
+## Dataset
+The dataset is taken from NYC's 2009 taxi database that recorded taxi trips spanning a certain timeframe on January 15, 2009. The dataset is contained in a CSV file, with each line corresponding to a trip record and the columns representing the relevant attributes of each trip. Since we want to identify the best waiting areas, we are interested in the starting points. As such, the dataset includes the GPS coordinates of the start and end point for each taxi trip.
 
-To view the datasets and results for each paradigms, select one of the following options.
+The image below is an example of a visualization of the plotted GPS coordinates of the NYC taxi dataset from the [Java](/Java) version of this project, spanning 1 hour on January 15, 2009, and containing 21,232 points. Note that each of the four implementations of this project uses a different sized dataset (for example, the [Golang](\Golang) version uses the same dataset, but spanning 12 hours and contains 232,051 points instead)
+
+_Disclaimer: Google Maps has a cap at 2,000 markers per layer. As such, not all points are plotted as the dataset contains 21,232 points._
+
+<div><img src="https://user-images.githubusercontent.com/67518620/150623764-db94fc77-e238-46b7-abd5-0b0630aeabb8.png" width="100%"></div>
+
+## Results
+Since each of the four versions of this project uses a different dataset to match their respective paradigms' strengths, it is evident that they also produce different results.
+
+To view the datasets and results for each programming paradigm, select one of the following options.
   - [objected-oriented programming (Java)](/Java)
-  - concurrent programming (Golang)
+  - [concurrent programming (Golang)](/Golang)
   - logical programming (Prolog)
   - functional programming (Scheme)
