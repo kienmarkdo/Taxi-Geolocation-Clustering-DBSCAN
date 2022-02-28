@@ -195,12 +195,12 @@ func DBscan(coords *[]LabelledGPScoord, MinPts int, eps float64, offset int) (nc
 
 		for i := range seedSet {
 			if seedSet[i].Label == -1 { // if label is noise
-				seedSet[i].Label = nclusters
+				seedSet[i].Label = offset + nclusters
 			}
 			if seedSet[i].Label != 0 { // if label is undefined
 				continue
 			}
-			seedSet[i].Label = nclusters
+			seedSet[i].Label = offset + nclusters
 			seedNeighbours := rangeQuery(coords, seedSet[i], eps)
 
 			if len(seedNeighbours) >= MinPts {

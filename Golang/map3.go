@@ -8,6 +8,7 @@ import (
 	"encoding/csv"
 	"fmt"
 	"io"
+	"math"
 	"os"
 	"strconv"
 	"time"
@@ -24,6 +25,14 @@ type LabelledGPScoord struct {
 	Label int // cluster ID
 }
 
+type Job struct {
+	coords []LabelledGPScoord
+	minPts int
+	eps    float64
+	offset int
+}
+
+const consumerCount = 4
 const N int = 4
 const MinPts int = 5
 const eps float64 = 0.0003
@@ -82,6 +91,17 @@ func main() {
 	// Parallel DBSCAN STEP 2.
 	// Apply DBSCAN on each partition
 	// ...
+	// // i := 0
+	// // j := 0
+	// // DBscan(grid[i][j], MinPts, eps, i*10000000+j*1000000)
+
+	// i := 0
+	// j := 2
+	// DBscan(grid[i][j], MinPts, eps, i*10000000+j*1000000)
+
+	// i = 0
+	// j = 3
+	// DBscan(grid[i][j], MinPts, eps, i*10000000+j*1000000)
 
 	// Parallel DBSCAN step 3.
 	// merge clusters
@@ -91,6 +111,10 @@ func main() {
 	fmt.Printf("\nExecution time: %s of %d points\n", end.Sub(start), partitionSize)
 }
 
+func consumer() {
+
+}
+
 // Applies DBSCAN algorithm on LabelledGPScoord points
 // LabelledGPScoord: the slice of LabelledGPScoord points
 // MinPts, eps: parameters for the DBSCAN algorithm
@@ -98,30 +122,97 @@ func main() {
 // returns number of clusters found
 func DBscan(coords []LabelledGPScoord, MinPts int, eps float64, offset int) (nclusters int) {
 
-	// *** fake code: to be rewritten
-	time.Sleep(3)
 	nclusters = 0
-	for i, pt := range coords {
 
-		if i == 10 {
-			nclusters++
-		}
-		if i == 100 {
-			nclusters++
-		}
-		if i == 100 {
-			break
+	for p := 0; p < len(coords); p++ {
+		if (coords)[p].Label != 0 { // undefined
+			continue
 		}
 
-		pt.Label = offset + nclusters
-	}
-	// *** end of fake code.
+		neighbours := rangeQuery(coords, (coords)[p], eps)
 
-	// End of DBscan function
+		if len(neighbours) < MinPts {
+			(coords)[p].Label = -1 // noise
+			continue
+		}
+
+		nclusters++
+		(coords)[p].Label = nclusters + offset
+
+		var seedSet []*LabelledGPScoord
+		seedSet = append(seedSet, neighbours...)
+
+		for q := 0; q < len(seedSet); q++ {
+			if seedSet[q].Label == -1 { // noise
+				seedSet[q].Label = nclusters + offset
+			}
+
+			if seedSet[q].Label != 0 { // undefined
+				continue
+			}
+
+			seedSet[q].Label = nclusters + offset
+
+			seedNeighbours := rangeQuery(coords, *seedSet[q], eps)
+			if len(seedNeighbours) >= MinPts {
+				// addNeighbours(&seedSet, seedNeighbours)
+				seedSet = append(seedSet, seedNeighbours...)
+				seedSet = removeDuplicateGPS(seedSet)
+
+			}
+		} // end of inner for loop
+
+	} // end of outer for loop
+
 	// Printing the result (do not remove)
 	fmt.Printf("Partition %10d : [%4d,%6d]\n", offset, nclusters, len(coords))
 
 	return nclusters
+}
+
+func rangeQuery(db []LabelledGPScoord, p LabelledGPScoord, eps float64) []*LabelledGPScoord {
+
+	var neighbours []*LabelledGPScoord
+
+	for i := 0; i < len(db); i++ {
+		if calculateDistance(p, db[i]) <= eps {
+			neighbours = append(neighbours, &db[i])
+		}
+	}
+	return neighbours
+}
+
+func calculateDistance(p1 LabelledGPScoord, p2 LabelledGPScoord) float64 {
+	return math.Sqrt((p1.lat-p2.lat)*(p1.lat-p2.lat) + (p1.long-p2.long)*(p1.long-p2.long))
+}
+
+func addNeighbours(seed *[]LabelledGPScoord, neighbours []LabelledGPScoord) {
+	for i := range neighbours {
+		if !contains(*seed, neighbours[i]) {
+			*seed = append(*seed, neighbours[i])
+		}
+	}
+}
+
+func contains(seed []LabelledGPScoord, point LabelledGPScoord) bool {
+	for i := range seed {
+		if seed[i] == point {
+			return true
+		}
+	}
+	return false
+}
+
+func removeDuplicateGPS(gpsSlice []*LabelledGPScoord) []*LabelledGPScoord {
+	allKeys := make(map[LabelledGPScoord]bool)
+	list := []*LabelledGPScoord{}
+	for _, item := range gpsSlice {
+		if _, value := allKeys[*item]; !value {
+			allKeys[*item] = true
+			list = append(list, &(*item))
+		}
+	}
+	return list
 }
 
 // reads a csv file of trip records and returns a slice of the LabelledGPScoord of the pickup locations
