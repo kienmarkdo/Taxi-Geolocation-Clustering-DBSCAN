@@ -191,9 +191,9 @@ func DBscan(coords *[]LabelledGPScoord, MinPts int, eps float64, offset int) (nc
 		var seedSet []LabelledGPScoord // Neighbours to expand
 		//seedSet = append(seedSet, currTrip) // set core trip
 		//addToSeed(&seedSet, neighbours)
-		//seedSet = append(seedSet, neighbours...)
+		seedSet = append(seedSet, neighbours...)
 
-		for i := 0; i < len(seedSet); i++ {
+		for i := range seedSet {
 			if seedSet[i].Label == -1 { // if label is noise
 				seedSet[i].Label = nclusters
 			}
@@ -205,8 +205,8 @@ func DBscan(coords *[]LabelledGPScoord, MinPts int, eps float64, offset int) (nc
 
 			if len(seedNeighbours) >= MinPts {
 				//addToSeed(&seedSet, seedNeighbours)
-				// seedSet = append(seedSet, neighbours...)
-				// seedSet = removeDuplicateGPS(seedSet)
+				seedSet = append(seedSet, neighbours...)
+				seedSet = removeDuplicateGPS(seedSet)
 			}
 
 		} // end of inner for loop
