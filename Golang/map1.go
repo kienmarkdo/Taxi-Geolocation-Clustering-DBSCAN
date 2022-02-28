@@ -281,10 +281,10 @@ func calculateDistance(c1 GPScoord, c2 GPScoord) float64 {
 	return math.Sqrt((c1.lat-c2.lat)*(c1.lat-c2.lat) + (c1.long-c2.long)*(c1.long-c2.long))
 }
 
-func removeDuplicateGPS(strSlice []LabelledGPScoord) []LabelledGPScoord {
+func removeDuplicateGPS(gpsSlice []LabelledGPScoord) []LabelledGPScoord {
 	allKeys := make(map[LabelledGPScoord]bool)
 	list := []LabelledGPScoord{}
-	for _, item := range strSlice {
+	for _, item := range gpsSlice {
 		if _, value := allKeys[item]; !value {
 			allKeys[item] = true
 			list = append(list, item)
