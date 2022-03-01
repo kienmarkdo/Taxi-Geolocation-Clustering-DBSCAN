@@ -1,4 +1,4 @@
-# Concurrent programming (Golang)
+# Concurrent programming (Go)
 In the Go version of this project, the DBSCAN algorithm is run concurrently on partitions of the Trip Record data. The partitions are created by dividing the geographical area into a grid of NxN. The following figure illustrates the case of a partition made of 4x4 cells (NOTE: In this case, the DBSCAN algorithm would run on 16 concurrent threads):
 
 <p align="center">
