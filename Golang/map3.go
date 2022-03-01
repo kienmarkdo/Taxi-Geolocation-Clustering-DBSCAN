@@ -200,7 +200,7 @@ func DBscan(coords *[]LabelledGPScoord, MinPts int, eps float64, offset int) (nc
 			if len(seedNeighbours) >= MinPts {
 				// addNeighbours(&seedSet, seedNeighbours)
 				seedSet = append(seedSet, seedNeighbours...)
-				seedSet = removeDuplicateGPS(seedSet)
+				//seedSet = removeDuplicateGPS(seedSet)
 
 			}
 		} // end of inner for loop
