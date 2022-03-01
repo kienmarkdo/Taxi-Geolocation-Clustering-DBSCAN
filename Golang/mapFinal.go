@@ -1,7 +1,10 @@
-// Project CSI2120/CSI2520
-// Winter 2022
-// Robert Laganiere, uottawa.ca
-// version 1.2
+/*
+Nom / Name             : Kien Do
+Cours / Course         : CSI2520 - Paradigmes de programation / Programming Paradigms
+Professeur / Professor : Robert Laganière, uottawa.ca
+Session                : Hiver 2022 / Winter 2022
+Projet / Project       : Clustering Taxi Geolocation Using Concurrent DBSCAN
+*/
 
 package main
 
@@ -104,18 +107,19 @@ func main() {
 
 	// Parallel DBSCAN STEP 2.
 	// Apply DBSCAN on each partition
+	// Follows the producer-consumer pattern, specifically the Single Producer Mutiple Consumer pattern
 	jobs := make(chan Job)
 	mutex := make(semaphore)
 
 	fmt.Printf("N = %d and %d consumer threads.\n\n", N, ConsumerCount)
 
 	for i := 0; i < ConsumerCount; i++ {
-		go consume(jobs, mutex) // consumer threads that clusters partitions
+		go consume(jobs, mutex) // Multiple consumer threads that cluster partitions
 	}
 
 	for j := 0; j < N; j++ {
 		for i := 0; i < N; i++ {
-			// producer thread that produces jobs (partition to be clustered)
+			// Single producer thread that produces jobs (partition to be clustered)
 			jobs <- Job{grid[i][j], MinPts, eps, i*10000000 + j*1000000}
 		}
 	}
@@ -142,7 +146,7 @@ func consume(jobs <-chan Job, sem semaphore) {
 		if more {
 			DBscan(&j.coords, j.minPts, j.eps, j.offset)
 		} else {
-			sem.Signal()
+			sem.Signal() // closes the semaphore by signalling that there are no jobs left to be consumed
 			return
 		}
 	}
@@ -155,40 +159,42 @@ func consume(jobs <-chan Job, sem semaphore) {
 // returns number of clusters found
 func DBscan(coords *[]LabelledGPScoord, MinPts int, eps float64, offset int) (nclusters int) {
 
-	nclusters = 0
+	nclusters = 0 // Cluster counter
 
 	for p := 0; p < len(*coords); p++ {
-		if (*coords)[p].Label != 0 { // 0 means undefined
+		if (*coords)[p].Label != 0 { // 0 means undefined; Previously processed in inner loop
 			continue
 		}
 
-		neighbours := rangeQuery(*coords, (*coords)[p], eps)
+		neighbours := rangeQuery(*coords, (*coords)[p], eps) // Find neighbours (excludes core pointer)
 
+		// Density check
 		if len(neighbours) < MinPts {
-			(*coords)[p].Label = -1 // -1 means noise
+			(*coords)[p].Label = -1 // Label as noise with value -1
 			continue
 		}
 
-		nclusters++
-		(*coords)[p].Label = nclusters + offset // adds on offset to the cluster to avoid overlapping IDs in partitions
+		nclusters++                             // increase cluster count
+		(*coords)[p].Label = nclusters + offset // Label initial point; add offset to avoid overlapping IDs in partitions
 
-		var seedSet []*LabelledGPScoord
-		seedSet = append(seedSet, neighbours...) // removal of core point/p!=q condition is in rangeQuery()
+		var seedSet []*LabelledGPScoord          // Seedset stores the core point's neighbours
+		seedSet = append(seedSet, neighbours...) // NOTE: Removal of core point/p!=q condition is in rangeQuery()
 
+		// Find the neighbours of seedSet (find the neighbours of the core point's neighbours)
 		for q := 0; q < len(seedSet); q++ {
 			if seedSet[q].Label == -1 { // -1 means noise
-				seedSet[q].Label = nclusters + offset
+				seedSet[q].Label = nclusters + offset // Change noise to border point
 			}
 
-			if seedSet[q].Label != 0 { // 0 means undefined
+			if seedSet[q].Label != 0 { // not undefined; point has been processed (e.g.: border point)
 				continue
 			}
 
-			seedSet[q].Label = nclusters + offset
+			seedSet[q].Label = nclusters + offset // Label initial point; add offset to avoid overlapping IDs in partitions
 			seedNeighbours := rangeQuery(*coords, *seedSet[q], eps)
 
 			if len(seedNeighbours) >= MinPts {
-				// no need to check for duplicates
+				// NOTE: no need to check for duplicates when appending to seedSet
 				// core point/p!=q condition is removed in rangeQuery()
 				seedSet = append(seedSet, seedNeighbours...)
 			}
@@ -202,13 +208,15 @@ func DBscan(coords *[]LabelledGPScoord, MinPts int, eps float64, offset int) (nc
 	return nclusters
 }
 
-// Scans the database/partition and returns a list of neighbouring LabelledGPScoords within the eps radius around a given LabelledGPScoord.
-// This is a helper function to DBSCAN.
+// Scans the database/partition and returns a list of neighbouring LabelledGPScoords within the eps radius around a given LabelledGPScoord
+// NOTE: This version of rangeQuery() does not include the core point as a neighbouring point
+// This is a helper function to DBSCAN()
 func rangeQuery(db []LabelledGPScoord, p LabelledGPScoord, eps float64) []*LabelledGPScoord {
 
 	var neighbours []*LabelledGPScoord
 
 	for i := 0; i < len(db); i++ {
+		// NOTE: Does not include the core point as a neighbour
 		if p != db[i] && calculateDistance(p, db[i]) <= eps {
 			neighbours = append(neighbours, &db[i])
 		}
@@ -217,6 +225,7 @@ func rangeQuery(db []LabelledGPScoord, p LabelledGPScoord, eps float64) []*Label
 }
 
 // Returns the Eucidian distance (float64) between two LabelledGPScoords
+// This is a helper function to rangeQuery()
 func calculateDistance(p1 LabelledGPScoord, p2 LabelledGPScoord) float64 {
 	return math.Sqrt((p1.lat-p2.lat)*(p1.lat-p2.lat) + (p1.long-p2.long)*(p1.long-p2.long))
 }
