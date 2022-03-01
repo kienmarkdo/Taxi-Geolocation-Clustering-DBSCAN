@@ -59,8 +59,8 @@ func (s semaphore) Signal() {
 
 // constant variables
 // variables constantes
-const ConsumerCount = 4
-const N int = 10
+const ConsumerCount = 200
+const N int = 20
 const MinPts int = 5
 const eps float64 = 0.0003
 const filename string = "yellow_tripdata_2009-01-15_9h_21h_clean.csv"
