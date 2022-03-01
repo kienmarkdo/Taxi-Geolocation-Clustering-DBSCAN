@@ -9,6 +9,7 @@ import (
 	"encoding/csv"
 	"fmt"
 	"io"
+	"math"
 	"os"
 	"runtime"
 	"strconv"
@@ -22,15 +23,47 @@ type GPScoord struct {
 
 type LabelledGPScoord struct {
 	GPScoord
-	ID    int // point ID
+	ID    int // point ID (0 = undefined, -1 = noise)
 	Label int // cluster ID
 }
 
-const N int = 4
+// Job structure used to produce jobs
+// Struct Job utilisé pour produire des jobs
+type Job struct {
+	coords []LabelledGPScoord
+	minPts int
+	eps    float64
+	offset int
+}
+
+// Uses a semaphore for synchronisation instead of Waitgroup
+// Utilisation d'une semaphore pour la synchronisation au lieu d'utiliser Waitgroup
+type semaphore chan bool
+
+// function that waits for all the go routines
+// fonction qui va attendre toutes les go routines
+func (s semaphore) Wait(n int) {
+	for i := 0; i < n; i++ {
+		<-s
+	}
+}
+
+// function that signals the end of a go routine (similar to Waitgroup.Done())
+// fonction qui signale la fin d'une go routine
+func (s semaphore) Signal() {
+	s <- true
+}
+
+// constant variables
+// variables constantes
+const ConsumerCount = 4
+const N int = 10
 const MinPts int = 5
 const eps float64 = 0.0003
 const filename string = "yellow_tripdata_2009-01-15_9h_21h_clean.csv"
 
+// main function
+// fonction main
 func main() {
 
 	start := time.Now()
@@ -53,7 +86,6 @@ func main() {
 
 	// Create the partition
 	// triple loop! not very efficient, but easier to understand
-
 	partitionSize := 0
 	for j := 0; j < N; j++ {
 		for i := 0; i < N; i++ {
@@ -70,20 +102,26 @@ func main() {
 		}
 	}
 
-	// ***
-	// This is the non-concurrent procedural version
-	// It should be replaced by a producer thread that produces jobs (partition to be clustered)
-	// And by consumer threads that clusters partitions
+	// Parallel DBSCAN STEP 2.
+	// Apply DBSCAN on each partition
+	jobs := make(chan Job)
+	mutex := make(semaphore)
+
+	fmt.Printf("N = %d and %d consumer threads.\n\n", N, ConsumerCount)
+
+	for i := 0; i < ConsumerCount; i++ {
+		go consume(jobs, mutex) // consumer threads that clusters partitions
+	}
+
 	for j := 0; j < N; j++ {
 		for i := 0; i < N; i++ {
-
-			DBscan(grid[i][j], MinPts, eps, i*10000000+j*1000000)
+			// producer thread that produces jobs (partition to be clustered)
+			jobs <- Job{grid[i][j], MinPts, eps, i*10000000 + j*1000000}
 		}
 	}
 
-	// Parallel DBSCAN STEP 2.
-	// Apply DBSCAN on each partition
-	// ...
+	close(jobs)
+	mutex.Wait(ConsumerCount)
 
 	// Parallel DBSCAN step 3.
 	// merge clusters
@@ -94,37 +132,93 @@ func main() {
 	fmt.Printf("Number of CPUs: %d", runtime.NumCPU())
 }
 
+// Consumer function takes produced jobs and processes them
+// Fonction consomme prend des jobs produits et les traite
+func consume(jobs <-chan Job, sem semaphore) {
+
+	for {
+		j, more := <-jobs // takes a job out of the production queue; more indicates there are still more jobs in the queue
+
+		if more {
+			DBscan(&j.coords, j.minPts, j.eps, j.offset)
+		} else {
+			sem.Signal()
+			return
+		}
+	}
+}
+
 // Applies DBSCAN algorithm on LabelledGPScoord points
 // LabelledGPScoord: the slice of LabelledGPScoord points
 // MinPts, eps: parameters for the DBSCAN algorithm
 // offset: label of first cluster (also used to identify the cluster)
 // returns number of clusters found
-func DBscan(coords []LabelledGPScoord, MinPts int, eps float64, offset int) (nclusters int) {
+func DBscan(coords *[]LabelledGPScoord, MinPts int, eps float64, offset int) (nclusters int) {
 
-	// *** fake code: to be rewritten
-	time.Sleep(3)
 	nclusters = 0
-	for i, pt := range coords {
 
-		if i == 10 {
-			nclusters++
-		}
-		if i == 100 {
-			nclusters++
-		}
-		if i == 100 {
-			break
+	for p := 0; p < len(*coords); p++ {
+		if (*coords)[p].Label != 0 { // 0 means undefined
+			continue
 		}
 
-		pt.Label = offset + nclusters
-	}
-	// *** end of fake code.
+		neighbours := rangeQuery(*coords, (*coords)[p], eps)
 
-	// End of DBscan function
+		if len(neighbours) < MinPts {
+			(*coords)[p].Label = -1 // -1 means noise
+			continue
+		}
+
+		nclusters++
+		(*coords)[p].Label = nclusters + offset // adds on offset to the cluster to avoid overlapping IDs in partitions
+
+		var seedSet []*LabelledGPScoord
+		seedSet = append(seedSet, neighbours...) // removal of core point/p!=q condition is in rangeQuery()
+
+		for q := 0; q < len(seedSet); q++ {
+			if seedSet[q].Label == -1 { // -1 means noise
+				seedSet[q].Label = nclusters + offset
+			}
+
+			if seedSet[q].Label != 0 { // 0 means undefined
+				continue
+			}
+
+			seedSet[q].Label = nclusters + offset
+			seedNeighbours := rangeQuery(*coords, *seedSet[q], eps)
+
+			if len(seedNeighbours) >= MinPts {
+				// no need to check for duplicates
+				// core point/p!=q condition is removed in rangeQuery()
+				seedSet = append(seedSet, seedNeighbours...)
+			}
+		} // end of inner for loop
+
+	} // end of outer for loop
+
 	// Printing the result (do not remove)
-	fmt.Printf("Partition %10d : [%4d,%6d]\n", offset, nclusters, len(coords))
+	fmt.Printf("Partition %10d : [%4d,%6d]\n", offset, nclusters, len(*coords))
 
 	return nclusters
+}
+
+// Scans the database/partition and returns a list of neighbouring LabelledGPScoords within the eps radius around a given LabelledGPScoord.
+// This is a helper function to DBSCAN.
+func rangeQuery(db []LabelledGPScoord, p LabelledGPScoord, eps float64) []*LabelledGPScoord {
+
+	var neighbours []*LabelledGPScoord
+
+	for i := 0; i < len(db); i++ {
+		if p != db[i] && calculateDistance(p, db[i]) <= eps {
+			neighbours = append(neighbours, &db[i])
+		}
+	}
+	return neighbours
+}
+
+// Returns the Eucidian distance (float64) between two LabelledGPScoords
+func calculateDistance(p1 LabelledGPScoord, p2 LabelledGPScoord) float64 {
+	return math.Sqrt((p1.lat-p2.lat)*(p1.lat-p2.lat) + (p1.long-p2.long)*(p1.long-p2.long))
 }
 
 // reads a csv file of trip records and returns a slice of the LabelledGPScoord of the pickup locations
