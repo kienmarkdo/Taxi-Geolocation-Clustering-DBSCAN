@@ -17,6 +17,11 @@ NOTE: The 3rd step (Reduce) is skipped in this implementation.
 ### Experimentation
 This concurrent version of the DBSCAN algorithm is based on the [producer-consumer pattern](https://en.wikipedia.org/wiki/Producer%E2%80%93consumer_problem) (worker pools), specifically the [Single Producer Multiple Consumer variation](https://betterprogramming.pub/hands-on-go-concurrency-the-producer-consumer-pattern-c42aab4e3bd2). A [semaphore](https://en.wikipedia.org/wiki/Semaphore_(programming)#Producer%E2%80%93consumer_problem) is used to solve the producer-consumer problem.
 
+### Additional Notes
+The DBSCAN implementation has a restricted minimum point of `GPScoord{-74., 40.7}` and a maximum point of `GPScoord{-73.93, 40.8}`. These coordinates represent the area of downtown Manhattan, NYC.
+
+If we were to create partitions on the entire city of New York, one or two partitions in the downtown Manhattan area would be doing a lot of the work to cluster the points (because that area is busier than the rest of the city). Meanwhile, the number of clusters around the city would be very small, giving those partitions almost no work to do. This would defeat the purpose of concurrency; therefore, the boundaries of the partitioning step (step 1 of MapReduce) will only be restricted to the downtown Manhattan area for maximum efficiency.
+
 ## Dataset
 The dataset is taken from NYC's 2009 taxi database that recorded taxi trips in the span of **12 hours** (from 9h to 21h) on January 15, 2009. The dataset is contained in a CSV file, with each line corresponding to a trip record and the columns representing the relevant attributes of each trip, and contains _232,051_ points.
 
