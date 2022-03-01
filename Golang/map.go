@@ -24,7 +24,7 @@ type LabelledGPScoord struct {
 	Label int // cluster ID
 }
 
-const N int = 10
+const N int = 4
 const MinPts int = 5
 const eps float64 = 0.0003
 const filename string = "yellow_tripdata_2009-01-15_9h_21h_clean.csv"
@@ -35,6 +35,9 @@ func main() {
 
 	gps, minPt, maxPt := readCSVFile(filename)
 	fmt.Printf("Number of points: %d\n", len(gps))
+
+	minPt = GPScoord{-74., 40.7}
+	maxPt = GPScoord{-73.93, 40.8}
 
 	// geographical limits
 	fmt.Printf("NW:(%f , %f)\n", minPt.long, minPt.lat)
@@ -48,6 +51,8 @@ func main() {
 
 	// Create the partition
 	// triple loop! not very efficient, but easier to understand
+
+	partitionSize := 0
 	for j := 0; j < N; j++ {
 		for i := 0; i < N; i++ {
 
@@ -57,6 +62,7 @@ func main() {
 				if (pt.long >= minPt.long+float64(i)*incx-eps) && (pt.long < minPt.long+float64(i+1)*incx+eps) && (pt.lat >= minPt.lat+float64(j)*incy-eps) && (pt.lat < minPt.lat+float64(j+1)*incy+eps) {
 
 					grid[i][j] = append(grid[i][j], pt) // add the point to this slide
+					partitionSize++
 				}
 			}
 		}
@@ -82,7 +88,7 @@ func main() {
 	// *DO NOT PROGRAM THIS STEP
 
 	end := time.Now()
-	fmt.Printf("\nExecution time: %s\n", end.Sub(start))
+	fmt.Printf("\nExecution time: %s of %d points\n", end.Sub(start), partitionSize)
 }
 
 // Applies DBSCAN algorithm on LabelledGPScoord points
@@ -113,7 +119,7 @@ func DBscan(coords []LabelledGPScoord, MinPts int, eps float64, offset int) (ncl
 
 	// End of DBscan function
 	// Printing the result (do not remove)
-	fmt.Printf("Cluster %10d : [%4d,%6d]\n", offset, nclusters, len(coords))
+	fmt.Printf("Partition %10d : [%4d,%6d]\n", offset, nclusters, len(coords))
 
 	return nclusters
 }

@@ -1,6 +1,7 @@
 // Project CSI2120/CSI2520
 // Winter 2022
 // Robert Laganiere, uottawa.ca
+// version 1.2
 
 package main
 
@@ -8,8 +9,8 @@ import (
 	"encoding/csv"
 	"fmt"
 	"io"
-	"math"
 	"os"
+	"runtime"
 	"strconv"
 	"time"
 )
@@ -22,32 +23,9 @@ type GPScoord struct {
 type LabelledGPScoord struct {
 	GPScoord
 	ID    int // point ID
-	Label int // cluster ID => 0 = undefined, -1 = noise
+	Label int // cluster ID
 }
 
-type Job struct {
-	coords []LabelledGPScoord
-	minPts int
-	eps    float64
-	offset int
-}
-
-// Utilisation d'une semaphore pour la synchronisation
-type semaphore chan bool
-
-// fonction qui va attendre toutes les go routines
-func (s semaphore) Wait(n int) {
-	for i := 0; i < n; i++ {
-		<-s
-	}
-}
-
-// fonction qui signale la fin d'une go routine
-func (s semaphore) Signal() {
-	s <- true
-}
-
-const ConsumerCount int = 4
 const N int = 4
 const MinPts int = 5
 const eps float64 = 0.0003
@@ -60,15 +38,12 @@ func main() {
 	gps, minPt, maxPt := readCSVFile(filename)
 	fmt.Printf("Number of points: %d\n", len(gps))
 
-	// minPt and MaxPt are limited to the downtown manhattan region for even concurrency
-	// otherwise, 2-3 threads will be working on 90% of the work in downtown manhatten, while the rest
-	// of the threads are only working on a select few clusters - that would defeat the purpose of concurrency
-	minPt = GPScoord{-74., 40.7}
-	maxPt = GPScoord{-73.93, 40.8}
+	minPt = GPScoord{40.7, -74.}
+	maxPt = GPScoord{40.8, -73.93}
 
 	// geographical limits
-	fmt.Printf("NW:(%f , %f)\n", minPt.long, minPt.lat)
-	fmt.Printf("SE:(%f , %f) \n\n", maxPt.long, maxPt.lat)
+	fmt.Printf("SW:(%f , %f)\n", minPt.lat, minPt.long)
+	fmt.Printf("NE:(%f , %f) \n\n", maxPt.lat, maxPt.long)
 
 	// Parallel DBSCAN STEP 1.
 	incx := (maxPt.long - minPt.long) / float64(N)
@@ -99,34 +74,16 @@ func main() {
 	// This is the non-concurrent procedural version
 	// It should be replaced by a producer thread that produces jobs (partition to be clustered)
 	// And by consumer threads that clusters partitions
-	// for j := 0; j < N; j++ {
-	// 	for i := 0; i < N; i++ {
-	// 		DBscan(&grid[i][j], MinPts, eps, i*10000000+j*1000000)
-	// 	}
-	// }
-
-	// Parallel DBSCAN STEP 2.
-	// Apply DBSCAN on each partition
-	// Learned about the producer-worker pattern / worker-jobs pattern from here: https://betterprogramming.pub/hands-on-go-concurrency-the-producer-consumer-pattern-c42aab4e3bd2
-	// Implemented using Single/Multiple Producer Multiple Consumer variation
-
-	const producerCount = N
-
-	jobs := make(chan Job, N*N)
-	mutex := make(semaphore, N*N)
-
-	for i := 0; i < ConsumerCount; i++ {
-		go consume(jobs, mutex)
-	}
-
 	for j := 0; j < N; j++ {
 		for i := 0; i < N; i++ {
-			jobs <- Job{grid[i][j], MinPts, eps, i*10000000 + j*1000000}
+
+			DBscan(grid[i][j], MinPts, eps, i*10000000+j*1000000)
 		}
 	}
 
-	close(jobs)
-	mutex.Wait(ConsumerCount)
+	// Parallel DBSCAN STEP 2.
+	// Apply DBSCAN on each partition
+	// ...
 
 	// Parallel DBSCAN step 3.
 	// merge clusters
@@ -134,32 +91,7 @@ func main() {
 
 	end := time.Now()
 	fmt.Printf("\nExecution time: %s of %d points\n", end.Sub(start), partitionSize)
-}
-
-// func produce(jobs chan<- Job, grid *[N][N][]LabelledGPScoord, wg *sync.WaitGroup) {
-// 	defer wg.Done()
-
-// 	for j := 0; j < N; j++ {
-// 		for i := 0; i < N; i++ {
-// 			jobs <- Job{grid[i][j], MinPts, eps, i*10000000 + j*1000000}
-// 			//jobs <- DBscan(&grid[i][j], MinPts, eps, i*10000000+j*1000000)
-// 		}
-// 	}
-
-// }
-
-func consume(jobs <-chan Job, sem semaphore) {
-
-	for {
-		j, more := <-jobs
-
-		if more {
-			DBscan(&j.coords, j.minPts, j.eps, j.offset)
-		} else {
-			sem.Signal()
-			return
-		}
-	}
+	fmt.Printf("Number of CPUs: %d", runtime.NumCPU())
 }
 
 // Applies DBSCAN algorithm on LabelledGPScoord points
@@ -167,150 +99,33 @@ func consume(jobs <-chan Job, sem semaphore) {
 // MinPts, eps: parameters for the DBSCAN algorithm
 // offset: label of first cluster (also used to identify the cluster)
 // returns number of clusters found
-func DBscan(coords *[]LabelledGPScoord, MinPts int, eps float64, offset int) (nclusters int) {
+func DBscan(coords []LabelledGPScoord, MinPts int, eps float64, offset int) (nclusters int) {
 
+	// *** fake code: to be rewritten
+	time.Sleep(3)
 	nclusters = 0
+	for i, pt := range coords {
 
-	for i := range *coords {
-		// current trip is (*coords)[i]
-		if (*coords)[i].Label != 0 { // if label is undefined
-			continue
+		if i == 10 {
+			nclusters++
+		}
+		if i == 100 {
+			nclusters++
+		}
+		if i == 100 {
+			break
 		}
 
-		neighbours := rangeQuery(coords, (*coords)[i], eps)
-
-		if len(neighbours) < MinPts {
-			(*coords)[i].Label = -1 // if label is noise
-			continue
-		}
-
-		nclusters++
-
-		(*coords)[i].Label = offset + nclusters
-
-		var seedSet []LabelledGPScoord // Neighbours to expand
-		//seedSet = append(seedSet, currTrip) // set core trip
-		//addToSeed(&seedSet, neighbours)
-		seedSet = append(seedSet, neighbours...)
-
-		for i := range seedSet {
-			if seedSet[i].Label == -1 { // if label is noise
-				seedSet[i].Label = offset + nclusters
-			}
-			if seedSet[i].Label != 0 { // if label is undefined
-				continue
-			}
-			seedSet[i].Label = offset + nclusters
-			seedNeighbours := rangeQuery(coords, seedSet[i], eps)
-
-			if len(seedNeighbours) >= MinPts {
-				//addToSeed(&seedSet, seedNeighbours)
-				seedSet = append(seedSet, neighbours...)
-				seedSet = removeDuplicateGPS(seedSet)
-			}
-
-		} // end of inner for loop
-
-	} // end of coords (outer) for loop
-
-	// for _, currTrip := range *coords {
-	// 	if currTrip.Label != 0 { // if label is undefined
-	// 		continue
-	// 	}
-
-	// 	neighbours := rangeQuery(coords, currTrip, eps)
-
-	// 	if len(neighbours) < MinPts {
-	// 		currTrip.Label = -1 // if label is noise
-	// 		continue
-	// 	}
-
-	// 	nclusters++
-
-	// 	currTrip.Label = offset + nclusters
-
-	// 	var seedSet []LabelledGPScoord // Neighbours to expand
-	// 	//seedSet = append(seedSet, currTrip) // set core trip
-	// 	//addToSeed(&seedSet, neighbours)
-	// 	seedSet = append(seedSet, neighbours...)
-
-	// 	for i := 0; i < len(seedSet); i++ {
-	// 		if seedSet[i].Label == -1 { // if label is noise
-	// 			seedSet[i].Label = nclusters
-	// 		}
-	// 		if seedSet[i].Label != 0 { // if label is undefined
-	// 			continue
-	// 		}
-	// 		seedSet[i].Label = nclusters
-	// 		seedNeighbours := rangeQuery(coords, seedSet[i], eps)
-
-	// 		if len(seedNeighbours) >= MinPts {
-	// 			//addToSeed(&seedSet, seedNeighbours)
-	// 			seedSet = append(seedSet, neighbours...)
-	// 			seedSet = removeDuplicateGPS(seedSet)
-	// 		}
-
-	// 	} // end of inner for loop
-
-	// } // end of coords (outer) for loop
+		pt.Label = offset + nclusters
+	}
+	// *** end of fake code.
 
 	// End of DBscan function
 	// Printing the result (do not remove)
-	fmt.Printf("Partition %10d : [%4d,%6d]\n", offset, nclusters, len(*coords))
+	fmt.Printf("Partition %10d : [%4d,%6d]\n", offset, nclusters, len(coords))
 
 	return nclusters
 }
-
-// Scans the database and returns a list of neighbouring LabelledGPScoords within the eps radius around a given LabelledGPScoord.
-// This is a helper function to DBSCAN.
-func rangeQuery(db *[]LabelledGPScoord, currCoord LabelledGPScoord, eps float64) []LabelledGPScoord {
-
-	var neighbours []LabelledGPScoord
-
-	for _, otherTrip := range *db {
-		if calculateDistance(currCoord.GPScoord, otherTrip.GPScoord) <= eps {
-			neighbours = append(neighbours, otherTrip)
-		}
-	}
-
-	return neighbours
-}
-
-// Returns the Eucidian distance (float64) between two LabelledGPScoords
-func calculateDistance(c1 GPScoord, c2 GPScoord) float64 {
-	return math.Sqrt((c1.lat-c2.lat)*(c1.lat-c2.lat) + (c1.long-c2.long)*(c1.long-c2.long))
-}
-
-func removeDuplicateGPS(gpsSlice []LabelledGPScoord) []LabelledGPScoord {
-	allKeys := make(map[LabelledGPScoord]bool)
-	list := []LabelledGPScoord{}
-	for _, item := range gpsSlice {
-		if _, value := allKeys[item]; !value {
-			allKeys[item] = true
-			list = append(list, item)
-		}
-	}
-	return list
-}
-
-// // Adds a set of LabelledGPScoord onto the current cluster.
-// func addToSeed(seedSet *[]LabelledGPScoord, neighbours []LabelledGPScoord) {
-// 	for _, newTrip := range neighbours {
-// 		if !contains(seedSet, newTrip) {
-// 			*seedSet = append(*seedSet, newTrip)
-// 		}
-// 	}
-// }
-
-// // Returns true if a coordinate is in a list of LabelledGPScoords
-// func contains(coordsList *[]LabelledGPScoord, coord LabelledGPScoord) bool {
-// 	for _, curr := range *coordsList {
-// 		if coord == curr {
-// 			return true
-// 		}
-// 	}
-// 	return false
-// }
 
 // reads a csv file of trip records and returns a slice of the LabelledGPScoord of the pickup locations
 // and the minimum and maximum GPS coordinates
@@ -352,10 +167,9 @@ func readCSVFile(filename string) (coords []LabelledGPScoord, minPt GPScoord, ma
 			panic("Invalid file format...")
 		}
 
-		// get latitude
-		lat, err := strconv.ParseFloat(record[8], 64)
+		// get lattitude
+		lat, err := strconv.ParseFloat(record[9], 64)
 		if err != nil {
-			fmt.Printf("\n%d lat=%s\n", n, record[8])
 			panic("Data format error (lat)...")
 		}
 
@@ -368,7 +182,7 @@ func readCSVFile(filename string) (coords []LabelledGPScoord, minPt GPScoord, ma
 		}
 
 		// get longitude
-		long, err := strconv.ParseFloat(record[9], 64)
+		long, err := strconv.ParseFloat(record[8], 64)
 		if err != nil {
 			panic("Data format error (long)...")
 		}
