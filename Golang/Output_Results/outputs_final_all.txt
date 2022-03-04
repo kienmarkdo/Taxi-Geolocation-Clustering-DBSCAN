@@ -3,7 +3,7 @@ Number of points: 232050
 SW:(40.700000 , -74.000000) 
 NE:(40.800000 , -73.930000) 
 
-N = 2 and 4 consumer threads.       
+N = 2 and 4 consumer threads.
 
 Partition   10000000 : [  21,   765]
 Partition   11000000 : [  60, 38243]

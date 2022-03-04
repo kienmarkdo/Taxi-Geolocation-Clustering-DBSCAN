@@ -1,0 +1,25 @@
+Number of points: 232050
+SW:(40.700000 , -74.000000) 
+NE:(40.800000 , -73.930000) 
+
+N = 4 and 4 consumer threads.
+
+Partition   30000000 : [   0,    17]
+Partition   20000000 : [   9,   272]
+Partition   10000000 : [  12,   540]
+Partition   21000000 : [   6,   288]
+Partition   31000000 : [   7,   226]
+Partition          0 : [  33,  6514]
+Partition   11000000 : [  20, 14022]
+Partition   22000000 : [  15, 19940]
+Partition   32000000 : [  15,  1192]
+Partition    3000000 : [   4,  2015]
+Partition   13000000 : [  14, 15370]
+Partition    2000000 : [  25, 31599]
+Partition   33000000 : [  19,  2187]
+Partition   23000000 : [  20, 16535]
+Partition    1000000 : [  18, 38774]
+Partition   12000000 : [   9, 56611]
+
+Execution time: 9.3677512s of 206102 points
+Number of CPUs: 8
