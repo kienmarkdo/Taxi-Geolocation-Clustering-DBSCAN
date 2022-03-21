@@ -3,10 +3,16 @@ This Java version is the first part of the DBSCAN comprehensive project.
 
 The DBSCAN clustering algorithm as well as its dependant functions and methods are implemented as intended. The program takes the path of the dataset (CSV file), processes it, and outputs either one single CSV file containing all the clusters (in the single CSV file version) or multiple CSV files - one for each cluster (in the multiple CSV files version) depending on the version you choose to run. 
 
-The single CSV output version may be better to readability and to have a general overview of the clustered data, whereas the multiple CSV outputs version may be better for plotting the clusters on Google Maps.
+The single CSV output version may be better to readability and to have a general overview of the clustered data, whereas the multiple CSV outputs version may be better for plotting the clusters on Google Maps. The difference is highlighted below in Dataset -> Results -> Version 1 and Version 2.
 
 All source code is implemented from scratch. UML class diagrams and detailed documentation are also included in the development of this project.
 
+## Implementation
+The DBSCAN algorithm is implemented in order to cluster the various trip records using the GPS coordinates of the starting points. The program is a Java application, named `TaxiClusters.java` that is run by specifying the dataset filename and the values of the parameters `minPts` and `eps`. This program produces as output the list of clusters contained in a csv file specifying, for each cluster, 
+- its position (average value of the GPS coordinates of its point set), and
+- number of points it contains. The outlier points are discarded.
+
+Since this dataset is very large, the dataset is a reduced version of containing all the trip records for January 15, 2009 between 12pm and 1pm.
 
 ## Dataset
 The dataset is taken from NYC's 2009 taxi database that recorded taxi trips in the span of 1 hour on January 15, 2009. The dataset is contained in a CSV file, with each line corresponding to a trip record and the columns representing the relevant attributes of each trip. Since we want to identify the best waiting areas, we are interested in the starting points. As such, the dataset includes the GPS coordinates of the start and end point for each taxi trip. 
