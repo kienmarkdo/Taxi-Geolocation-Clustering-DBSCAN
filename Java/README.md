@@ -1,7 +1,12 @@
 # Objected-oriented programming (Java)
-UML class diagrams and detailed documentation are also included in the development of this project.
+This Java version is the first part of the DBSCAN comprehensive project. 
 
-All source code is implemented from scratch.
+The DBSCAN clustering algorithm as well as its dependant functions and methods are implemented as intended. The program takes the path of the dataset (CSV file), processes it, and outputs either one single CSV file containing all the clusters (in the single CSV file version) or multiple CSV files - one for each cluster (in the multiple CSV files version) depending on the version you choose to run. 
+
+The single CSV output version may be better to readability and to have a general overview of the clustered data, whereas the multiple CSV outputs version may be better for plotting the clusters on Google Maps.
+
+All source code is implemented from scratch. UML class diagrams and detailed documentation are also included in the development of this project.
+
 
 ## Dataset
 The dataset is taken from NYC's 2009 taxi database that recorded taxi trips in the span of 1 hour on January 15, 2009. The dataset is contained in a CSV file, with each line corresponding to a trip record and the columns representing the relevant attributes of each trip. Since we want to identify the best waiting areas, we are interested in the starting points. As such, the dataset includes the GPS coordinates of the start and end point for each taxi trip. 
