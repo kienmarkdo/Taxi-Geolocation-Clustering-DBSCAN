@@ -17,7 +17,7 @@ In other words, the steps are: create partitions, perform DBSCAN on each partiti
 NOTE: The 3rd step (Merge/Reduce) is skipped in this implementation.
 
 ### Experimentation
-This concurrent version of the DBSCAN algorithm is based on the [producer-consumer pattern](https://en.wikipedia.org/wiki/Producer%E2%80%93consumer_problem) (worker pools), specifically the [Single Producer Multiple Consumer variation](https://betterprogramming.pub/hands-on-go-concurrency-the-producer-consumer-pattern-c42aab4e3bd2). A [semaphore](https://en.wikipedia.org/wiki/Semaphore_(programming)#Producer%E2%80%93consumer_problem) is used to solve the producer-consumer problem.
+This concurrent version of the DBSCAN algorithm is based on the [producer-consumer pattern](https://en.wikipedia.org/wiki/Producer%E2%80%93consumer_problem) (worker pools), specifically the [Single Producer Multiple Consumer variation](https://betterprogramming.pub/hands-on-go-concurrency-the-producer-consumer-pattern-c42aab4e3bd2). The experimentation is carried out with several combinations of different numbers of **partitions** and **consumer threads** in order to observe the optimal solution. A [semaphore](https://en.wikipedia.org/wiki/Semaphore_(programming)#Producer%E2%80%93consumer_problem) structure is implemented to solve the producer-consumer problem.
 
 ### Additional Notes
 The DBSCAN implementation has a restricted minimum point of `GPScoord{-74., 40.7}` and a maximum point of `GPScoord{-73.93, 40.8}`. These coordinates represent the area of downtown Manhattan, NYC.
