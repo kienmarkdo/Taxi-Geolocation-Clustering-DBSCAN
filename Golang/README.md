@@ -1,5 +1,5 @@
 # Concurrent programming (Go)
-In the Go version of this project, the DBSCAN algorithm is run concurrently on partitions of the Trip Record data. The partitions are created by dividing the geographical area into a grid of NxN. The following figure illustrates the case of a partition made of 4x4 cells (NOTE: In this case, the DBSCAN algorithm would run on 16 concurrent threads):
+In this Go version of the comprehensive project, the DBSCAN algorithm is run concurrently on partitions of the Trip Record data. The partitions are created by dividing the geographical area into a grid of NxN. The following figure illustrates the case of a partition made of 4x4 cells (NOTE: In this case, the DBSCAN algorithm would run on 16 concurrent threads):
 
 <p align="center">
   <img height="300" src="https://user-images.githubusercontent.com/67518620/155905579-7ba41e0f-f315-4c67-a57b-dbd189e8fffc.png">
@@ -12,7 +12,9 @@ The parallel DBSCAN algorithm is based on the [MapReduce pattern](https://en.wik
   2. Apply the DBSCAN algorithm over each partition.
   3. Reduce the results by collecting the clusters from all partitions. Intersecting clusters must be merged.
 
-NOTE: The 3rd step (Reduce) is skipped in this implementation.
+In other words, the steps are: create partitions, perform DBSCAN on each partition concurrently, merge the partitions in so get one big result; however, note that the 3rd step (merging the partitions) will not be implemented as we are only interested in the concurrency aspect (step 2) of this Go version of the project.
+
+NOTE: The 3rd step (Merge/Reduce) is skipped in this implementation.
 
 ### Experimentation
 This concurrent version of the DBSCAN algorithm is based on the [producer-consumer pattern](https://en.wikipedia.org/wiki/Producer%E2%80%93consumer_problem) (worker pools), specifically the [Single Producer Multiple Consumer variation](https://betterprogramming.pub/hands-on-go-concurrency-the-producer-consumer-pattern-c42aab4e3bd2). A [semaphore](https://en.wikipedia.org/wiki/Semaphore_(programming)#Producer%E2%80%93consumer_problem) is used to solve the producer-consumer problem.
