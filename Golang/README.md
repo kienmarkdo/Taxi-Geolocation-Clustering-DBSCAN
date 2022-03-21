@@ -189,7 +189,7 @@ Number of CPUs: 8
 ```
 </details>
 
-For more Output results, view the [Ouput folder](/Output_Results).
+For more Output results, view the [Ouput folder](Output_Results).
 
 ## Takeaways
 Of course, no one can build a project without running into problems. Since I dealt with concurrency in this version of the project, most of the challenges I encountered were regarding the efficiency of my program. 
