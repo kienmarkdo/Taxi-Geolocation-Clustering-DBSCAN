@@ -11,15 +11,16 @@ Clustering is done with the [DBSCAN](https://en.wikipedia.org/wiki/DBSCAN) algor
 
 ## Implementation
 The project is implemented in four programming languages and paradigms where each implementation is specific to the language and paradigm's purpose: 
-  - [objected-oriented programming (Java)](https://github.com/kienmarkdo/Taxi-Geolocation-Clustering-DBSCAN/tree/main/Java)
-  - [concurrent programming (Golang)](https://github.com/kienmarkdo/Taxi-Geolocation-Clustering-DBSCAN/tree/main/Golang)
-  - [logical programming (Prolog)](https://github.com/kienmarkdo/Taxi-Geolocation-Clustering-DBSCAN/tree/main/Prolog)
-  - [functional programming (Scheme)](https://github.com/kienmarkdo/Taxi-Geolocation-Clustering-DBSCAN/tree/main/Scheme)
+  - [objected-oriented programming (Java)](Java)
+  - [concurrent programming (Golang)](Golang)
+  - [logical programming (Prolog)](Prolog)
+  - [functional programming (Scheme)](Scheme)
+<!-- Example of full path (https://github.com/kienmarkdo/Taxi-Geolocation-Clustering-DBSCAN/tree/main/Java) -->
 
 ## Dataset
 The dataset is taken from NYC's 2009 taxi database that recorded taxi trips spanning a certain timeframe on January 15, 2009. The dataset is contained in a CSV file, with each line corresponding to a trip record and the columns representing the relevant attributes of each trip. Since we want to identify the best waiting areas, we are interested in the starting points. As such, the dataset includes the GPS coordinates of the start and end point for each taxi trip.
 
-The image below is an example of a visualization of the plotted GPS coordinates of the NYC taxi dataset from the [Java](https://github.com/kienmarkdo/Taxi-Geolocation-Clustering-DBSCAN/tree/main/Java) version of this project, spanning 1 hour on January 15, 2009, and containing **_21,232 points_**. Note that each of the four implementations of this project uses a different sized dataset (for example, the [Golang](https://github.com/kienmarkdo/Taxi-Geolocation-Clustering-DBSCAN/tree/main/Golang) version uses the same dataset, but spanning 12 hours and contains **_232,051 points_** instead).
+The image below is an example of a visualization of the plotted GPS coordinates of the NYC taxi dataset from the [Java](Java) version of this project, spanning 1 hour on January 15, 2009, and containing **_21,232 points_**. Note that each of the four implementations of this project uses a different sized dataset (for example, the [Golang](Golang) version uses the same dataset, but spanning 12 hours and contains **_232,051 points_** instead).
 
 _Disclaimer: Google Maps has a cap at 2,000 markers per layer. As such, not all points are plotted as the dataset contains 21,232 points._
 
@@ -29,7 +30,7 @@ _Disclaimer: Google Maps has a cap at 2,000 markers per layer. As such, not all 
 Since each of the four versions of this project uses a different dataset to match their respective paradigms' strengths, it is evident that they also produce different results.
 
 To view the datasets and results for each programming paradigm, select one of the following options.
-  - [objected-oriented programming (Java)](https://github.com/kienmarkdo/Taxi-Geolocation-Clustering-DBSCAN/tree/main/Java)
-  - [concurrent programming (Golang)](https://github.com/kienmarkdo/Taxi-Geolocation-Clustering-DBSCAN/tree/main/Golang)
-  - [logical programming (Prolog)](https://github.com/kienmarkdo/Taxi-Geolocation-Clustering-DBSCAN/tree/main/Prolog)
-  - [functional programming (Scheme)](https://github.com/kienmarkdo/Taxi-Geolocation-Clustering-DBSCAN/tree/main/Scheme)
+  - [objected-oriented programming (Java)](Java)
+  - [concurrent programming (Golang)](Golang)
+  - [logical programming (Prolog)](Prolog)
+  - [functional programming (Scheme)](Scheme)
