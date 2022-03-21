@@ -12,9 +12,9 @@ The parallel DBSCAN algorithm is based on the [MapReduce pattern](https://en.wik
   2. Apply the DBSCAN algorithm over each partition.
   3. Reduce the results by collecting the clusters from all partitions. Intersecting clusters must be merged.
 
-In other words, the steps are: create partitions, perform DBSCAN on each partition concurrently, merge the partitions in so get one big result; however, note that the 3rd step (merging the partitions) will not be implemented as we are only interested in the concurrency aspect (step 2) of this Go version of the project.
+In other words, the steps are: create partitions, concurrently perform DBSCAN on each partition, merge the partitions to get one big result. However, the 3rd step (merging the partitions step) will not be implemented as we are only interested in the concurrency aspect (step 2) of this Go version of the project. The 3rd step will be implemented in the Prolog version of the project.
 
-NOTE: The 3rd step (Merge/Reduce) is skipped in this implementation.
+NOTE: The 3rd step (Merge/Reduce) is skipped in this implementation. It is implemented in the Prolog version of this project.
 
 ### Experimentation
 This concurrent version of the DBSCAN algorithm is based on the [producer-consumer pattern](https://en.wikipedia.org/wiki/Producer%E2%80%93consumer_problem) (worker pools), specifically the [Single Producer Multiple Consumer variation](https://betterprogramming.pub/hands-on-go-concurrency-the-producer-consumer-pattern-c42aab4e3bd2). The experimentation is carried out with several combinations of different numbers of **partitions** and **consumer threads** in order to observe the optimal solution. A [semaphore](https://en.wikipedia.org/wiki/Semaphore_(programming)#Producer%E2%80%93consumer_problem) structure is implemented to solve the producer-consumer problem.
