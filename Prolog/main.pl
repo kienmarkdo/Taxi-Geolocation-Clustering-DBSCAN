@@ -62,9 +62,21 @@ populateClusterList([H|T], add, A, ClusterList) :-
     populateClusterList(T, check, AA, ClusterList)
 .
 
-relabel([_, X, Y, CLUSTER_ID], C, L) :-
-
+% relabel works START
+relabel(_, _, [], []) :- !.
+relabel(OldClusterID, NewClusterID, [[P, X, Y, OldClusterID]|T], Result) :-
+    relabel(OldClusterID, NewClusterID, T, RR),
+    insert([P, X, Y, NewClusterID], RR, Result),
+    !
 .
+
+relabel(OldClusterID, NewClusterID, [[P, X, Y, NoChange]|T], Result) :-
+    relabel(OldClusterID, NewClusterID, T, RR),
+    insert([P, X, Y, NoChange], RR, Result),
+    !
+.
+% relabel works END
+
 
 % loop through all the points (paritions == points)
 % findall([D,X,Y,C], partition(_,D,X,Y,C), L).
