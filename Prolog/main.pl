@@ -1,8 +1,8 @@
 /*
 Nom / Name             : Kien Do
-Cours / Course         : CSI2520 - Paradigmes de programation / Programming Paradigms
+Cours / Course         : CSI2520 - Paradigmes de programmation / Programming Paradigms
 Professeur / Professor : Robert Laganière, uottawa.ca
-Session                : Hiver 2022 / Winter 2022
+Session / Semester     : Hiver 2022 / Winter 2022
 Projet / Project       : Merging DBSCAN-Clustered Taxi Geolocation Partitions
 */
 
