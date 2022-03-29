@@ -46,13 +46,13 @@ Since we are not implementing the DBSCAN algorithm and only *merging* the result
 
 
 ## Results
-### Eps = 0.0003, MinPts = 5
+### List of merged clusters from the 7 given partitions
 <!-- NOTE: HTML Scroll Box doesn't work in GitHub markdown so <details> and <summary> are used instead. -->
 
 <!-- ===================================  DETAIL SEPARATOR  =================================== -->
 <details>
   <summary>
-    List of merged clusters from the 7 given partitions
+    View ClusterList Output
   </summary>
   
 ```
