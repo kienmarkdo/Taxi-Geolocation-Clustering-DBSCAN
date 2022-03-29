@@ -6,9 +6,18 @@ Session / Semester     : Hiver 2022 / Winter 2022
 Projet / Project       : Merging DBSCAN-Clustered Taxi Geolocation Partitions
 */
 
+/* =========================================  Start program  ========================================= */
+
+% start/0
+% runs the program and produces a clusters.txt containing the merged partitions as intended
+start :-
+    import,
+    mergeClusters(L), open('clusters.txt', write, F), write(F, L), close(F)
+.
+
 /* =====================================  Import partition files  ===================================== */
 
-% import/1
+% import/0
 % creates a knowledge base of all partitions extracted from the partition##.csv files
 %     using the predicate partition
 % the fact base created by the import predicate can be viewed by using the query:
