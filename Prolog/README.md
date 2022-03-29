@@ -1,13 +1,12 @@
 # Logic programming (Prolog)
-In this logic Prolog version of the comprehensive project, we focus on the third step of the parallel DBSCAN algorithm (MapReduce) where we merge the intersection clusters from adjacent partitions introduced in the concurrent Go version. 
+In this logic Prolog version of the comprehensive project, we focus on the third step of the parallel DBSCAN algorithm (MapReduce) where we merge the intersection clusters from adjacent partitions introduced in the concurrent Go version.
 
-We assume that the concurrent version of the DBSCAN algorithm has produced the resulting clusters in `partition##.csv` files and would be illustrated as such:
-<p align="center">
-  <img height="300" src="https://user-images.githubusercontent.com/67518620/160705493-c8d73d4f-8227-4b17-b76a-1dc62ded5db7.png">
-</p>
+The parallel DBSCAN algorithm extracts the clusters of a set by subdividing the region into a number of overlapping partitions. The fact that these partitions overlap with each other implies that some points (at the periphery of the partitions) might belong to more than one partition. Consequently, some clusters may contain the same point(s) and are then said to intersect.
 
-## Implementation
-### General algorithm (MapReduce pattern)
+In this case, these clusters must be merged because they should in fact constitute one large cluster covering more than one partition. The merging can be simply done by changing the label of one of the clusters to the one of the second.
+
+## Context
+### Concurrent DBSCAN algorithm (MapReduce pattern)
 The parallel DBSCAN algorithm is based on the [MapReduce pattern](https://en.wikipedia.org/wiki/MapReduce), a widely used pattern in concurrent programming, and proceeds as follows:
   1. Create partitions on the data
   2. Apply the DBSCAN algorithm over each partition
@@ -15,10 +14,16 @@ The parallel DBSCAN algorithm is based on the [MapReduce pattern](https://en.wik
 
 In this part of the project, the 3rd step (merging the partitions step) will be implemented.
 
-### Experimentation
+## Algorithm (Merge)
+
+<!-- The description can be illustrated as such: -->
+<p align="center">
+  <img height="300" src="https://user-images.githubusercontent.com/67518620/160705493-c8d73d4f-8227-4b17-b76a-1dc62ded5db7.png">
+</p>
+
 Suppose we have the 5 points of cluster A and the 8 points of cluster C in current ClusterList. We are now processing the partition containing clusters B and D. We first consider cluster D; it has no intersection with the points in ClusterList so its 4 points will simply be inserted to the list. Now if we consider cluster B, it has 3 points intersecting with cluster A and 4 points intersecting with cluster C. These 7 points will constitute the intersection set I and the labels of I are A and C. Consequently, the cluster label of all points in ClusterList having label A will be changed to B and same for the points having label C. Finally, the points in B are inserted into the ClusterList.
 
-Given the example figure at the start of this README, the steps are illustrated as follows:
+Given the figure above, the steps are illustrated as follows:
 
 - **Step 1:** Start with an empty ClusterList. Add all the points in cluster A to the empty ClusterList.
 <p align="center">
@@ -44,6 +49,18 @@ Given the example figure at the start of this README, the steps are illustrated 
 ## Dataset
 Since we are not implementing the DBSCAN algorithm and only *merging* the results created by DBSCAN (specifically, the concurrent version), the dataset will be CSV files containing extracted clusters in each partition. ample clustering results of 7 partitions are provided in 7 CSV files in the form `partition##.csv`. From that, we can create a knowledge base `partition` using the predicate `import`.
 
+```prolog
+?- import.
+partition(65, 1345, 40.750304, -73.952031, 65000001).
+partition(65, 6017, 40.760146, -73.957873, 65000002).
+partition(65, 17457, 40.760213, -73.955471, 65000003).
+partition(65, 18582, 40.750299, -73.952027, 65000001).
+partition(65, 20050, 40.750365, -73.952127, 65000001).
+partition(65, 25351, 40.760153, -73.955467, 65000003).
+partition(65, 34767, 40.758621, -73.957704, 65000004).
+partition(65, 36487, 40.758621, -73.957704, 65000004).
+...
+```
 
 ## Results
 ### List of merged clusters from the 7 given partitions
@@ -52,7 +69,7 @@ Since we are not implementing the DBSCAN algorithm and only *merging* the result
 <!-- ===================================  DETAIL SEPARATOR  =================================== -->
 <details>
   <summary>
-    View ClusterList Output
+    View Raw ClusterList Output
   </summary>
   
 ```
