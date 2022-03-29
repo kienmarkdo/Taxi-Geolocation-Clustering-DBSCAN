@@ -1,14 +1,14 @@
 # Objected-oriented programming (Java)
 This Java version is the first part of the DBSCAN comprehensive project. 
 
-The DBSCAN clustering algorithm as well as its dependant functions and methods are implemented as intended. The program takes the path of the dataset (CSV file), processes it, and outputs either one single CSV file containing all the clusters (in the single CSV file version) or multiple CSV files - one for each cluster (in the multiple CSV files version) depending on the version you choose to run. 
+The [DBSCAN clustering algorithm](https://en.wikipedia.org/wiki/DBSCAN) as well as its dependant functions and methods are implemented as intended. The program takes the path of the dataset (CSV file), processes it, and outputs either one single CSV file containing all the clusters (in the single CSV file version) or multiple CSV files - one for each cluster (in the multiple CSV files version) depending on the version you choose to run. 
 
-The single CSV output version may be better to readability and to have a general overview of the clustered data, whereas the multiple CSV outputs version may be better for plotting the clusters on Google Maps. The difference is highlighted below in Dataset -> Results -> Version 1 and Version 2.
+The single CSV output version may be better to readability and to have a general overview of the clustered data, whereas the multiple CSV outputs version may be better for plotting the clusters on Google Maps. The difference is highlighted below in Dataset -> Results -> [Version 1 (Multiple CSV outputs)](Multiple_CSV_Version) and [Version 2 (One CSV output)](One_CSV_Version_Sorted).
 
 All source code is implemented from scratch. UML class diagrams and detailed documentation are also included in the development of this project.
 
 ## Implementation
-The DBSCAN algorithm is implemented in order to cluster the various trip records using the GPS coordinates of the starting points. The program is a Java application, named `TaxiClusters.java` that is run by specifying the dataset filename and the values of the parameters `minPts` and `eps`. This program produces as output the list of clusters contained in a csv file specifying, for each cluster, 
+The DBSCAN algorithm is implemented to cluster the various trip records using the GPS coordinates of the starting points. The program is a Java application, named `TaxiClusters.java` that is run by specifying the dataset filename and the values of the parameters `minPts` and `eps`. This program produces as output the list of clusters contained in a csv file specifying, for each cluster, 
 - its position (average value of the GPS coordinates of its point set), and
 - number of points it contains. The outlier points are discarded.
 
