@@ -6,7 +6,7 @@ Session / Semester     : Hiver 2022 / Winter 2022
 Projet / Project       : Merging DBSCAN-Clustered Taxi Geolocation Partitions
 */
 
-/* ======================  Import partition files  ===================== */
+/* =====================================  Import partition files  ===================================== */
 
 % import/1
 % creates a knowledge base of all partitions extracted from the partition##.csv files
@@ -26,15 +26,14 @@ import :-
     % listing(partition) % partition(PARTITION_ID, POINT_ID, X, Y, CLUSTER_ID)
 .
 
-/* =====================  Merge partition clusters  ==================== */
+/* ====================================  Merge partition clusters  ==================================== */
 
 % mergeClusters/1
 % merge the clusters from partition and exclude overlapping clusters
 % returns list L containing all the marged partitions
 mergeClusters(L) :-
     findall([P,X,Y,C], partition(_,P,X,Y,C), LL),
-    populateClusterList(LL, [], LLL),
-    reverseList(LLL, L)
+    populateClusterList(LL, [], L)
 .
 
 
@@ -43,7 +42,7 @@ mergeClusters(L) :-
 % populates the cluster list by adding non-overlapping clusters or relabelling overlapping clusters
 
 % base case: the initial partition list has been iterated through completely; return the final cluster list
-populateClusterList([], A, A) :- !.
+populateClusterList([], AA, A) :- reverseList(AA, A), !. % reverse the final list due to front insertion insert(H, A, AA)
 
 % both populateClusterList predicates below uses the if/then/else design pattern using the cut
 % if current partition row overlaps with the cluster list (aka the auxiliary list, A)
@@ -81,7 +80,7 @@ relabel(OldClusterID, NewClusterID, [[P, X, Y, NoChange]|T], Result) :-
 .
 % relabel/4 ENDS
 
-/* ===================  Helper/auxiliary predicates  =================== */
+/* ==================================  Helper/auxiliary predicates  =================================== */
 
 % insert/2
 % insert(NewElement, List, NewList)
@@ -111,6 +110,88 @@ reverseList(L,R) :- reverse(L,[],R).
 printList([]) :- !.
 printList([H|T]) :- writeln(H), printList(T).
 
-/* =========================  Test predicates  ========================= */
+
+/* ========================================  Test predicates  ========================================= */
+
+
+% tests the printList predicate with different values/test cases
+test(printList) :- 
+    writeln('printList([[1,2.2,3.1,33], [2,2.1,3.1,22], [3,2.5,3.1,33], [4,2.1,4.1,33], [5,4.1,3.1,30]])'),
+    printList([[1,2.2,3.1,33], [2,2.1,3.1,22], [3,2.5,3.1,33], [4,2.1,4.1,33], [5,4.1,3.1,30]])
+.
+
+% tests the reverseList predicate with different values/test cases
+test(reverseList) :- 
+    writeln('reverseList([[1,2.2,3.1,33], [2,2.1,3.1,22], [3,2.5,3.1,33], [4,2.1,4.1,33], [5,4.1,3.1,30]], Result)'),
+    reverseList([[1,2.2,3.1,33], [2,2.1,3.1,22], [3,2.5,3.1,33], [4,2.1,4.1,33], [5,4.1,3.1,30]], Result),
+    write(Result)
+.
+
+% tests the reverse predicate with different values/test cases
+test(reverse) :- 
+    writeln('reverse([[1,2.2,3.1,33], [2,2.1,3.1,22], [3,2.5,3.1,33], [4,2.1,4.1,33], [5,4.1,3.1,30]], [], Result)'),
+    reverse([[1,2.2,3.1,33], [2,2.1,3.1,22], [3,2.5,3.1,33], [4,2.1,4.1,33], [5,4.1,3.1,30]], [], Result),
+    write(Result)
+.
+
+% tests the isOverlap predicate with different values/test cases
+test(isOverlap) :- 
+    writeln("Case 1: Overlapping is true."),
+    writeln('isOverlap([2,2.1,3.1,99], [[1,2.2,3.1,33], [2,2.1,3.1,22], [3,2.5,3.1,33], [4,2.1,4.1,33], [5,4.1,3.1,30]],
+                OldClusterID, NewClusterID)'),
+    isOverlap([2,2.1,3.1,99], [[1,2.2,3.1,33], [2,2.1,3.1,22], [3,2.5,3.1,33], [4,2.1,4.1,33], [5,4.1,3.1,30]],
+                OldClusterID1, NewClusterID1),
+    write("Old Cluster ID: "), writeln(OldClusterID1),
+    write("New Cluster ID: "), writeln(NewClusterID1),
+    writeln("================================================================================"),
+    writeln("Case 2: Overlapping is false."),
+    writeln('isOverlap([99,9.9,9.9,99], [[1,2.2,3.1,33], [2,2.1,3.1,22], [3,2.5,3.1,33], [4,2.1,4.1,33], [5,4.1,3.1,30]],
+                OldClusterID, NewClusterID)'),
+    isOverlap([99,9.9,9.9,99], [[1,2.2,3.1,33], [2,2.1,3.1,22], [3,2.5,3.1,33], [4,2.1,4.1,33], [5,4.1,3.1,30]],
+                OldClusterID2, NewClusterID2),
+    write("Old Cluster ID: "), writeln(OldClusterID2),
+    write("New Cluster ID: "), writeln(NewClusterID2)
+.
+
+% tests the insert predicate with different values/test cases
+test(insert) :-
+    writeln('insert([99,9.9,9.9,99], [[1,2.2,3.1,33], [2,2.1,3.1,22], [3,2.5,3.1,33], [4,2.1,4.1,33], [5,4.1,3.1,30]], Result)'),
+    write('Before : '), writeln('[[1,2.2,3.1,33], [2,2.1,3.1,22], [3,2.5,3.1,33], [4,2.1,4.1,33], [5,4.1,3.1,30]]'),
+    insert([99,9.9,9.9,99], [[1,2.2,3.1,33], [2,2.1,3.1,22], [3,2.5,3.1,33], [4,2.1,4.1,33], [5,4.1,3.1,30]], Result),
+    write('After  : '), write(Result)
+.
 
 % tests the relabel predicate with different values/test cases
+test(relabel) :- 
+    writeln('relabel(33, 77, [[1,2.2,3.1,33], [2,2.1,3.1,22], [3,2.5,3.1,33], [4,2.1,4.1,33], [5,4.1,3.1,30]], Result)'),
+    relabel(33, 77, [[1,2.2,3.1,33], [2,2.1,3.1,22], [3,2.5,3.1,33], [4,2.1,4.1,33], [5,4.1,3.1,30]], Result),
+    write(Result)
+.
+
+% tests the populateClusterList predicate with different values/test cases
+test(populateClusterList) :- 
+    writeln(
+        'populateClusterList(
+            [[1,2.2,3.1,33], [2,2.1,3.1,22], [3,2.5,3.1,33], [4,2.1,4.1,33], [5,4.1,3.1,30], 
+            [1,2.2,3.1,100], [2,2.1,3.1,101], [3,2.5,3.1,102], [4,2.1,4.1,103]], [], Result)'),
+    populateClusterList([
+                            [1,2.2,3.1,33], [2,2.1,3.1,22], [3,2.5,3.1,33], [4,2.1,4.1,33], [5,4.1,3.1,30],
+                            [1,2.2,3.1,100], [2,2.1,3.1,101], [3,2.5,3.1,102], [4,2.1,4.1,103]
+                        ], [], Result),
+    write(Result)
+.
+
+% tests the mergeClusters predicate with different values/test cases
+test(mergeClusters) :- 
+    writeln('mergeClusters(Result)'),
+    mergeClusters(Result),
+    write(Result)
+.
+
+% tests the import predicate
+test(import) :- 
+    writeln('import'),
+    writeln('listing(partition) % partition(PARTITION_ID, POINT_ID, X, Y, CLUSTER_ID)'),
+    import,
+    listing(partition)
+.
