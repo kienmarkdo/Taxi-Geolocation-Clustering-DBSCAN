@@ -81,4 +81,6 @@ partition(65, 36487, 40.758621, -73.957704, 65000004).
 For more Output results, view the [Ouput folder](Output_Merged_Clusters_Results).
 
 ## Takeaways
+I learned that it takes a lot of humility and patience to learn a new programming paradigm such as logic and declarative programming with Prolog. I had to start from scratch and I found that carrying the object-oriented and imperative way of thinking from previous programming languages not only did not help me advance in Prolog but also pulled me backwards. It felt like swimming against the tide and as a result, I had to abandon basic ideas such as the "return" statement or "loops". Once I understood that Prolog is about telling the machine what I want and using recursion to help me with that, the language and paradigm immediately clicked for me.
 
+This project has given me a greater understand of recursion and a greater appreciation for declarative programming. Overall, I now have a strong grasp of Prolog, declarative, and logic programming thanks to this comprehensive DBSCAN project as well as the various assignments, labs, and tutorials I've done in the CSI2520 - Programming Paradigms course at uOttawa.
