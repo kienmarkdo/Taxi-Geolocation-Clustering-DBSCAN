@@ -1,5 +1,5 @@
 # Logic programming (Prolog)
-In this logic Prolog version of the comprehensive project, we focus on the third step of the parallel DBSCAN algorithm (MapReduce) where we merge the intersection clusters from adjacent partitions introduced in the concurrent Go version.
+In this Prolog version of the comprehensive project, we focus on the third step of the parallel [DBSCAN algorithm](https://en.wikipedia.org/wiki/DBSCAN) ([MapReduce](https://en.wikipedia.org/wiki/MapReduce)) where we merge the intersection clusters from adjacent partitions introduced in the concurrent Go version.
 
 The parallel DBSCAN algorithm extracts the clusters of a set by subdividing the region into a number of overlapping partitions. The fact that these partitions overlap with each other implies that some points (at the periphery of the partitions) might belong to more than one partition. Consequently, some clusters may contain the same point(s) and are then said to intersect.
 
@@ -7,14 +7,14 @@ In this case, these clusters must be merged because they should in fact constitu
 
 ## Context
 ### Concurrent DBSCAN algorithm (MapReduce pattern)
-The parallel DBSCAN algorithm is based on the [MapReduce pattern](https://en.wikipedia.org/wiki/MapReduce), a widely used pattern in concurrent programming, and proceeds as follows:
+The parallel DBSCAN algorithm is based on the [MapReduce pattern](https://en.wikipedia.org/wiki/MapReduce) and proceeds as follows:
   1. Create partitions on the data
   2. Apply the DBSCAN algorithm over each partition
   3. Reduce the results by merging the clusters from all partition to create one single result. Intersecting clusters must be merged
 
-In this part of the project, the 3rd step (merging the partitions step) will be implemented.
+***In this part of the project, the 3rd step (merging the partitions step) will be implemented.***
 
-## Algorithm (Merge)
+## Merging algorithm
 
 <!-- The description can be illustrated as such: -->
 <p align="center">
