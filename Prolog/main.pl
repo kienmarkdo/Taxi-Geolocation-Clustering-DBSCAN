@@ -9,11 +9,12 @@ Projet / Project       : Merging DBSCAN-Clustered Taxi Geolocation Partitions
 /* ======================  Import partition files  ===================== */
 
 % import/1
-% creates a fact base of all partitions extracted from the partition##.csv files
-% the fact based created by the import predicate can be viewed by using the query: 
-%      listing(partition) 
-% where the partition format is: 
-%      partition(PARTITION_ID, POINT_ID, X, Y, CLUSTER_ID)
+% creates a knowledge base of all partitions extracted from the partition##.csv files
+%     using the predicate partition
+% the fact base created by the import predicate can be viewed by using the query:
+%     listing(partition)
+% where the partition format is:
+%     partition(PARTITION_ID, POINT_ID, X, Y, CLUSTER_ID)
 import :-
     csv_read_file('partition65.csv', Data65, [functor(partition)]), maplist(assert, Data65),
     csv_read_file('partition74.csv', Data74, [functor(partition)]), maplist(assert, Data74),
@@ -25,34 +26,43 @@ import :-
     % listing(partition) % partition(PARTITION_ID, POINT_ID, X, Y, CLUSTER_ID)
 .
 
+/* =====================  Merge partition clusters  ==================== */
+
 % mergeClusters/1
-% merges the clusters in partition; includes removing all duplicate/overlapping clusters
+% merge the clusters from partition and exclude overlapping clusters
+% returns list L containing all the marged partitions
 mergeClusters(L) :-
     findall([P,X,Y,C], partition(_,P,X,Y,C), LL),
     populateClusterList(LL, [], LLL),
     reverseList(LLL, L)
 .
 
-% check to see if we should be relabelling or adding the current point to the cluster list
-% populateClusterList(Partitions, Condition, Auxiliary list, Final cluster list)
 
+% populateClusterList/3
+% populateClusterList(Partitions list, Auxiliary list, Final cluster list)
+% populates the cluster list by adding non-overlapping clusters or relabelling overlapping clusters
+
+% base case: the initial partition list has been iterated through completely; return the final cluster list
 populateClusterList([], A, A) :- !.
 
+% both populateClusterList predicates below uses the if/then/else design pattern using the cut
+% if current partition row overlaps with the cluster list (aka the auxiliary list, A)
+%     relabel all overlapping points in cluster list to the current partition row's cluster ID
+% else if the current partition row does not overlap with the points in cluster list
+%     add/insert the point into cluster list     
 populateClusterList([H|T], A, ClusterList) :-
     isOverlap(H, A, OldClusterID, NewClusterID),
-    relabel(OldClusterID, NewClusterID, A, AA), % relabel every overlapping cluster in cluster list to the new cluster
-    % this is slower than simply relabelling the ID of H to the IDs in A, but it is easier to implement
+    relabel(OldClusterID, NewClusterID, A, AA), % relabel all overlapping clusters in cluster list
     populateClusterList(T, AA, ClusterList),
     !
 .
+
 populateClusterList([H|T], A, ClusterList) :-
     insert(H, A, AA),
     populateClusterList(T, AA, ClusterList)
 .
+% populateClusterList/3 ENDS
 
-% add cluster to cluster list OR relabel the cluster IDs
-printList([]) :- !.
-printList([H|T]) :- writeln(H), printList(T).
 
 % relabel/4
 % relabels the points of cluster OldClusterID with label NewClusterID
@@ -69,31 +79,38 @@ relabel(OldClusterID, NewClusterID, [[P, X, Y, NoChange]|T], Result) :-
     insert([P, X, Y, NoChange], RR, Result),
     !
 .
-% relabel END
+% relabel/4 ENDS
 
 /* ===================  Helper/auxiliary predicates  =================== */
 
 % insert/2
-% insert item in front of a list
 % insert(NewElement, List, NewList)
+% insert an item NewElement in front of a list List; returns list NewList
 insert(A, L, [A|L]).
 
 % isOverlap/2
-% returns true if a given point already exists in a given list
-% that is, if PointID of the element is the same as any of the pointIDs of
-%    the elements in the given list, return true
-% change the cluster ID in the cluster list to the cluster ID of the given partition row
 % isOverlap(Element, List)
+% returns true AND the OldClusterID, NewClusterID if a given GPS point exists in the given cluster list
+% that is, if PointID of the given row X is the same as any of the pointIDs of
+%    the rows in the given list [_|L], return true
+% Note that OldClusterID is the ID in ClusterList and NewClusterID is the ID of the current row
 isOverlap([PointID, _, _, NewClusterID], [[PointID, _, _, OldClusterID]|_], OldClusterID, NewClusterID) :- !.
-% isOverlap([PointID, _, _, SameClusterID], [PointID, _, _, SameClusterID|T], OldClusterID, NewClusterID) :-
-%    isOverlap([PointID, _, _, SameClusterID], T, OldClusterID, NewClusterID)
-%.
 isOverlap(X, [_|L], OldClusterID, NewClusterID) :- isOverlap(X, L, OldClusterID, NewClusterID).
 
+% reverse/3
+% helper predicate for reverseList that reverses a list recursively using an auxiliary list
+reverse([], L, L) :- !.
+reverse([H|T], L, R) :- reverse(T, [H|L], R).
 
-renverser([],L,L):-!.
-renverser([H|T],L,R):- renverser(T,[H|L],R).
+% reverseList/2
+% reverses a given list using the helper predicate reverse
+reverseList(L,R) :- reverse(L,[],R).
 
-reverseList(L,R) :- renverser(L,[],R).
+% printList/1
+% prints the contents of a list by traversing through it from start to end recursively
+printList([]) :- !.
+printList([H|T]) :- writeln(H), printList(T).
 
+/* =========================  Test predicates  ========================= */
 
+% tests the relabel predicate with different values/test cases
