@@ -1,4 +1,4 @@
-/* Import partition files */
+/* Import partition files provided by professor Robert Laganière */
 import :-
     csv_read_file('partition65.csv', Data65, [functor(partition)]), maplist(assert, Data65),
     csv_read_file('partition74.csv', Data74, [functor(partition)]), maplist(assert, Data74),
