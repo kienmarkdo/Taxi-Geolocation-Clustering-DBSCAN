@@ -84,7 +84,7 @@ insert(A, L, [A|L]).
 %    the elements in the given list, return true
 % change the cluster ID in the cluster list to the cluster ID of the given partition row
 % isOverlap(Element, List)
-isOverlap([PointID, _, _, NewClusterID], [PointID, _, _, OldClusterID|_], OldClusterID, NewClusterID) :- !.
+isOverlap([PointID, _, _, NewClusterID], [[PointID, _, _, OldClusterID]|_], OldClusterID, NewClusterID) :- !.
 % isOverlap([PointID, _, _, SameClusterID], [PointID, _, _, SameClusterID|T], OldClusterID, NewClusterID) :-
 %    isOverlap([PointID, _, _, SameClusterID], T, OldClusterID, NewClusterID)
 %.
