@@ -7,7 +7,7 @@ This project implements a data clustering algorithm named [DBSCAN - Density-Base
 
 
 ## Clustering
-Clustering is done with the [DBSCAN](https://en.wikipedia.org/wiki/DBSCAN) algorithm which detects spatiotemporal taxi trip hotspots. The clustered data is then used in a recommendation system that generates optimal GPS routes for taxis that maximizes time driving passengers while minimizing time wasted on the road without serving a passenger. This ensures that taxi drivers can drop off a passenger and quickly pick up a nearby passenger to save time, money, and fuel, while also making sure that passengers can have a taxi as soon as possible.
+Clustering is done with the [DBSCAN algorithm](https://en.wikipedia.org/wiki/DBSCAN#Algorithm) which detects spatiotemporal taxi trip hotspots. The clustered data can then be used in a variety of applications, such as a recommendation system that generates optimal GPS routes for taxis that maximizes time driving passengers while minimizing time wasted on the road without serving a passenger. This ensures that taxi drivers can drop off a passenger and quickly pick up a nearby passenger to save time, money, and fuel, while also making sure that passengers can have a taxi as soon as possible.
 
 ## Implementation
 The project is implemented in four programming languages and paradigms where each implementation is specific to the language and paradigm's purpose: 
