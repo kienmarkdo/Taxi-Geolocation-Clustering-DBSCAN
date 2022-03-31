@@ -17,6 +17,53 @@ The project is implemented in four programming languages and paradigms where eac
   - [functional programming (Scheme)](Scheme)
 <!-- Example of full path (https://github.com/kienmarkdo/Taxi-Geolocation-Clustering-DBSCAN/tree/main/Java) -->
 
+<!-- NOTE: HTML Scroll Box doesn't work in GitHub markdown so <details> and <summary> are used instead. -->
+
+<!-- ===================================  DETAIL SEPARATOR  =================================== -->
+<details>
+  <summary>
+    Algorithm pseudocode
+  </summary>
+  
+```
+DBSCAN(DB, distFunc, eps, minPts) {
+    C := 0                                                  /* Cluster counter */
+    for each point P in database DB {
+        if label(P) ≠ undefined then continue               /* Previously processed in inner loop */
+        Neighbors N := RangeQuery(DB, distFunc, P, eps)     /* Find neighbors */
+        if |N| < minPts then {                              /* Density check */
+            label(P) := Noise                               /* Label as Noise */
+            continue
+        }
+        C := C + 1                                          /* next cluster label */
+        label(P) := C                                       /* Label initial point */
+        SeedSet S := N \ {P}                                /* Neighbors to expand */
+        for each point Q in S {                             /* Process every seed point Q */
+            if label(Q) = Noise then label(Q) := C          /* Change Noise to border point */
+            if label(Q) ≠ undefined then continue           /* Previously processed (e.g., border point) */
+            label(Q) := C                                   /* Label neighbor */
+            Neighbors N := RangeQuery(DB, distFunc, Q, eps) /* Find neighbors */
+            if |N| ≥ minPts then {                          /* Density check (if Q is a core point) */
+                S := S ∪ N                                  /* Add new neighbors to seed set */
+            }
+        }
+    }
+}
+
+RangeQuery(DB, distFunc, Q, eps) {
+    Neighbors N := empty list
+    for each point P in database DB {                      /* Scan all points in the database */
+        if distFunc(Q, P) ≤ eps then {                     /* Compute distance and check epsilon */
+            N := N ∪ {P}                                   /* Add to result */
+        }
+    }
+    return N
+}
+
+/* Reference: https://en.wikipedia.org/wiki/DBSCAN */
+```
+</details>
+
 ## Dataset
 The dataset is taken from NYC's 2009 taxi database that recorded taxi trips spanning a certain timeframe on January 15, 2009. The dataset is contained in a CSV file, with each line corresponding to a trip record and the columns representing the relevant attributes of each trip. Since we want to identify the best waiting areas, we are interested in the starting points. As such, the dataset includes the GPS coordinates of the start and end point for each taxi trip.
 
