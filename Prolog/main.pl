@@ -50,13 +50,13 @@ mergeClusters(L) :-
 % populateClusterList(Partitions list, Auxiliary list, Final cluster list)
 % populates the cluster list by adding non-overlapping clusters or relabelling overlapping clusters
 
-% base case: the initial partition list has been iterated through completely; return the final cluster list
+% end case (tail-recursion): the initial partition list has been iterated through completely; return the final cluster list
 populateClusterList([], AA, A) :- reverseList(AA, A), !. % reverse the final list due to front insertion insert(H, A, AA)
 
 % both populateClusterList predicates below uses the if/then/else design pattern using the cut
 % if current partition row overlaps with the cluster list (aka the auxiliary list, A)
 %     relabel all overlapping points in cluster list to the current partition row's cluster ID
-% else if the current partition row does not overlap with the points in cluster list
+% else (if the current partition row does not overlap with the points in cluster list)
 %     add/insert the point into cluster list     
 populateClusterList([H|T], A, ClusterList) :-
     isOverlap(H, A, OldClusterID, NewClusterID),
