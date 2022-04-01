@@ -43,7 +43,7 @@ Projet / Project       : Merging DBSCAN-Clustered Taxi Geolocation Partitions
   (cond
     ((equal? L '()) (reverse AccL)) ; end case of tail-recursion; return reverse of AccL due to cons
     ((equal? (overlap (car L) AccL) '()) (populate-cluster-list (cdr L) (cons (car L) AccL))) ; if no overlap
-    (else (relabel (last (car L)) (overlap (car L) AccL) AccL) (populate-cluster-list (cdr L) AccL)) ; if overlap
+    (else (populate-cluster-list (cdr L) (relabel (car (overlap (car L) AccL)) (last (car L)) AccL))) ; if overlap
   )
 )
 
@@ -66,7 +66,7 @@ Projet / Project       : Merging DBSCAN-Clustered Taxi Geolocation Partitions
 (define (overlap X L)
   (cond
     ((null? L) '())
-    ((= (car X) (car (car L))) (list (last X)))
+    ((= (car X) (car (car L))) (list (last (car L)))) ; return (OLD_ID)
     (else (overlap X (cdr L)))
   )
 )
@@ -95,7 +95,7 @@ Projet / Project       : Merging DBSCAN-Clustered Taxi Geolocation Partitions
 
 ;(import)
 "===================================================="
-(mergeClusters (import))
+;(mergeClusters (import))
 ;(define list '((1 2.2 3.1 33) (2 2.1 3.1 22) (3 2.5 3.1 33) (4 2.1 4.1 33) (5 4.1 3.1 30) (1 2.2 3.1 100) (2 2.1 3.1 101) (3 2.5 3.1 102) (4 2.1 4.1 103)))
 ;(mergeClusters list)
 ;(overlap (car list) '((1 2.2 3.1 33) (2 2.1 3.1 22)))
