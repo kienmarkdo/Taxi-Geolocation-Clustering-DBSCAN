@@ -54,7 +54,7 @@ Given the figure above, the steps are illustrated as follows:
 
 
 ## Dataset
-Since we are not implementing the DBSCAN algorithm and only *merging* the results created by DBSCAN (specifically, the concurrent version), the dataset will be CSV files containing extracted clusters in each partition. ample clustering results of 7 partitions are provided in 7 CSV files in the form `partition##.csv`. From that, we can create a knowledge base `partition` using the predicate `import`.
+Since we are not implementing the DBSCAN algorithm and only *merging* the results created by DBSCAN (specifically, the concurrent version), the dataset will be CSV files containing extracted clusters in each partition. Sample clustering results of 7 partitions are provided in 7 CSV files in the form `partition##.csv`. From that, we can create a knowledge base `partition` using the predicate `import`.
 
 ```prolog
 ?- import.
