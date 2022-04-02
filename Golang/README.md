@@ -5,6 +5,14 @@ In this Go version of the comprehensive project, the [DBSCAN algorithm](https://
   <img height="300" src="https://user-images.githubusercontent.com/67518620/155905579-7ba41e0f-f315-4c67-a57b-dbd189e8fffc.png">
 </p>
 
+## How to run
+Make sure [Go](https://go.dev/) is downloaded.
+
+Include the dataset file `yellow_tripdata_2009-01-15_9h_21h_clean.csv` in the same directory as `mainFinal.go`.
+
+Run the file `mainFinal.go` in the command line with `go run mainFinal.go`.
+
+
 ## Implementation
 ### General algorithm (MapReduce pattern)
 The parallel DBSCAN algorithm is based on the [MapReduce pattern](https://en.wikipedia.org/wiki/MapReduce), a widely used pattern in concurrent programming, and proceeds as follows:
