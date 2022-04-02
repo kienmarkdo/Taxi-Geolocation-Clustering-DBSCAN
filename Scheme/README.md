@@ -1,4 +1,4 @@
-# Functional programming (Prolog)
+# Functional programming (Scheme)
 In this Scheme version of the comprehensive project, we focus on the third step of the parallel [DBSCAN algorithm](https://en.wikipedia.org/wiki/DBSCAN) ([MapReduce](https://en.wikipedia.org/wiki/MapReduce)) where we merge the intersection clusters from adjacent partitions introduced in the concurrent Go version.
 
 The parallel DBSCAN algorithm extracts the clusters of a set by subdividing the region into a number of overlapping partitions. The fact that these partitions overlap with each other implies that some points (at the periphery of the partitions) might belong to more than one partition. Consequently, some clusters may contain the same point(s) and are then said to intersect.
