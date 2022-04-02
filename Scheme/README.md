@@ -6,7 +6,9 @@ The parallel DBSCAN algorithm extracts the clusters of a set by subdividing the 
 In this case, these clusters must be merged because they should in fact constitute one large cluster covering more than one partition. The merging can be simply done by changing the label of one of the clusters to the one of the second.
 
 ## How to run
-Open the file `main.scm` in [DrRacket](https://racket-lang.org/) and click Run. Make sure the `partition##.scm` files are also in the same directory.
+Open the file `main.scm` in [DrRacket](https://racket-lang.org/) and click Run.
+
+Make sure the `partition##.scm` files are also in the same directory.
 
 ## Context
 ### Concurrent DBSCAN algorithm (MapReduce pattern)
@@ -56,7 +58,7 @@ Since we are not implementing the DBSCAN algorithm and only *merging* the result
 </details>
 <!-- ===================================  DETAIL SEPARATOR  =================================== -->
 
-For more Output results, view the [Ouput folder](Output_Merged_Clusters_Results).
+Alternatively, view the output in the [Ouput folder](Output_Merged_Clusters_Results).
 
 ## Additional Notes
 This merge part of the parallel DBSCAN algorithm is also implemented in the [Prolog](/Prolog) version of the comprehensive project.
