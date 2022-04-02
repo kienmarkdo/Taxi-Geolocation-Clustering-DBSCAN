@@ -5,6 +5,13 @@ The parallel DBSCAN algorithm extracts the clusters of a set by subdividing the 
 
 In this case, these clusters must be merged because they should in fact constitute one large cluster covering more than one partition. The merging can be simply done by changing the label of one of the clusters to the one of the second.
 
+## How to run
+Open the file `main.pl` in [SWI-Prolog](https://www.swi-prolog.org/) and type in the query `start.` to produce the text file output `clusters.txt`.
+
+An alternative method is to run the program in [SWISH](https://swish.swi-prolog.org/), an online SWI-Prolog compiler.
+
+Make sure the `partition##.csv` files are also in the same directory.
+
 ## Context
 ### Concurrent DBSCAN algorithm (MapReduce pattern)
 The parallel DBSCAN algorithm is based on the [MapReduce pattern](https://en.wikipedia.org/wiki/MapReduce) and proceeds as follows:
