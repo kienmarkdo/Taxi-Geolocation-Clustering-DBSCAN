@@ -7,6 +7,11 @@ The single CSV output version may be better to readability and to have a general
 
 All source code is implemented from scratch. UML class diagrams and detailed documentation are also included in the development of this project.
 
+## How to run
+Place the four `.java` files from either the [Multiple_CSV_Version](Multiple_CSV_Version) or [One_CSV_Version_Sorted](One_CSV_Version_Sorted) in your IDE or directory.
+
+Run `TaxiClusters.java` in your IDE or in the command line with `javac TaxiClusters.java` and `java TaxiClusters.java`.
+
 ## Implementation
 The DBSCAN algorithm is implemented to cluster the various trip records using the GPS coordinates of the starting points. The program is a Java application, named `TaxiClusters.java` that is run by specifying the dataset filename and the values of the parameters `minPts` and `eps`. This program produces as output the list of clusters contained in a csv file specifying, for each cluster, 
 - its position (average value of the GPS coordinates of its point set), and
