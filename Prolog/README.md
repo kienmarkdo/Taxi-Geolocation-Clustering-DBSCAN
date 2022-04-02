@@ -73,8 +73,6 @@ partition(65, 36487, 40.758621, -73.957704, 65000004).
 ### List of merged clusters from the 7 given partitions
 <!-- NOTE: HTML Scroll Box doesn't work in GitHub markdown so <details> and <summary> are used instead. -->
 
-View the output by expanding the box below, or by viewing the [Ouput folder](Output_Merged_Clusters_Results).
-
 <!-- ===================================  DETAIL SEPARATOR  =================================== -->
 <details>
   <summary>
@@ -86,6 +84,8 @@ View the output by expanding the box below, or by viewing the [Ouput folder](Out
 ```
 </details>
 <!-- ===================================  DETAIL SEPARATOR  =================================== -->
+
+Alternatively, view the output in the [Ouput folder](Output_Merged_Clusters_Results).
 
 ## Additional notes
 This merge part of the parallel DBSCAN algorithm is also implemented in the [Scheme](/Scheme) version of the comprehensive project.
