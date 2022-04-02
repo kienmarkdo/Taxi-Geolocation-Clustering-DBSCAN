@@ -39,7 +39,7 @@ import :-
 
 % mergeClusters/1
 % merge the clusters from partition and exclude overlapping clusters
-% returns list L containing all the marged partitions
+% returns list L containing all merged partitions
 mergeClusters(L) :-
     findall([P,X,Y,C], partition(_,P,X,Y,C), LL),
     populateClusterList(LL, [], L)
