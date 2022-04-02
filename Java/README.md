@@ -8,7 +8,9 @@ The single CSV output version may be better to readability and to have a general
 All source code is implemented from scratch. UML class diagrams and detailed documentation are also included in the development of this project.
 
 ## How to run
-Place the four `.java` files from either the [Multiple_CSV_Version](Multiple_CSV_Version) or [One_CSV_Version_Sorted](One_CSV_Version_Sorted) in your IDE or directory.
+Place the four `.java` files from either the [Multiple_CSV_Version](Multiple_CSV_Version) or [One_CSV_Version_Sorted](One_CSV_Version_Sorted) in your IDE or directory. 
+
+Make sure the dataset file `yellow_tripdata_2009-01-15_1hour_clean.csv` is also included and is in the same directory.
 
 Run `TaxiClusters.java` in your IDE or in the command line with `javac TaxiClusters.java` and `java TaxiClusters.java`.
 
