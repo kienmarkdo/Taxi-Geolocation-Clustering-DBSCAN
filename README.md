@@ -11,10 +11,14 @@ Clustering is done with the [DBSCAN algorithm](https://en.wikipedia.org/wiki/DBS
 
 ## Implementation
 The project is implemented in four programming languages and paradigms where each implementation is specific to the language and paradigm's purpose: 
-  - [objected-oriented programming (Java)](Java)
-  - [concurrent programming (Golang)](Golang)
-  - [logical programming (Prolog)](Prolog)
-  - [functional programming (Scheme)](Scheme)
+  - [Objected-oriented (Java)](Java)
+    - DBSCAN algorithm is fully implemented and runs procedurally on the dataset
+  - [Concurrent (Golang)](Golang)
+    - DBSCAN algorithm runs concurrently on partitions of the dataset using the producer-consumer and thread pool pattern
+  - [Logical (Prolog)](Prolog)
+    - Performs the merging step of the MapReduce pattern on cluster partitions produced by the concurrent version declaratively
+  - [Functional (Scheme)](Scheme)
+    - Performs the merging step of the MapReduce pattern on cluster partitions produced by the concurrent version functionally
 <!-- Example of full path (https://github.com/kienmarkdo/Taxi-Geolocation-Clustering-DBSCAN/tree/main/Java) -->
 
 <!-- NOTE: HTML Scroll Box doesn't work in GitHub markdown so <details> and <summary> are used instead. -->
