@@ -73,10 +73,12 @@ partition(65, 36487, 40.758621, -73.957704, 65000004).
 ### List of merged clusters from the 7 given partitions
 <!-- NOTE: HTML Scroll Box doesn't work in GitHub markdown so <details> and <summary> are used instead. -->
 
+View the output by expanding the box below, or by viewing the [Ouput folder](Output_Merged_Clusters_Results).
+
 <!-- ===================================  DETAIL SEPARATOR  =================================== -->
 <details>
   <summary>
-    View Raw ClusterList Output
+    View Raw Cluster List Output
   </summary>
   
 ```
@@ -85,7 +87,8 @@ partition(65, 36487, 40.758621, -73.957704, 65000004).
 </details>
 <!-- ===================================  DETAIL SEPARATOR  =================================== -->
 
-For more Output results, view the [Ouput folder](Output_Merged_Clusters_Results).
+## Additional notes
+This merge part of the parallel DBSCAN algorithm is also implemented in the [Scheme](/Scheme) version of the comprehensive project.
 
 ## Takeaways
 I learned that it takes a lot of humility and patience to learn a new programming paradigm such as logic and declarative programming with Prolog. I had to start from scratch and I found that carrying the object-oriented and imperative way of thinking from previous programming languages not only did not help me advance in Prolog but also pulled me backwards. It felt like swimming against the tide and as a result, I had to abandon basic ideas such as the "return" statement or "loops". Once I understood that Prolog is about telling the machine what I want and using recursion to help me with that, the language and paradigm immediately clicked for me.
