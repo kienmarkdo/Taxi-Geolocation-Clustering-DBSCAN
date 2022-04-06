@@ -93,7 +93,7 @@
 ; ==================================  Output results to text file  =================================== ;
 
 ; runs the program and saves the output to a textfile that contains all of the partition-merged clusters
-; produces by the procedure (mergeClusters (import))
+; produced by the procedure (mergeClusters (import))
 (define (saveList filename L)
   (call-with-output-file filename
     (lambda (out)
