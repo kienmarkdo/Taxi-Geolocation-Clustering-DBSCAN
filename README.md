@@ -3,7 +3,7 @@ Inspired by [Clustering Taxi Geolocation Data To Predict Location of Taxi Servic
 
 Imagine we are managing a taxi fleet in NYC and we would like to identify the best waiting areas for our vehicles. To solve this problem, we have a large dataset of taxi trip records from 2009.
 
-This project implements a data clustering algorithm named [DBSCAN - Density-Based Spatial Clustering of Applications with Noise](https://en.wikipedia.org/wiki/DBSCAN). Given a large set of data points in a space of arbitrary dimension and given a distance metric, this algorithm can discover clusters of different shapes and sizes, marking as outliers isolated points in low-density regions (i.e. points whose nearest neighbors are too far away).
+This project implements a data clustering algorithm named [DBSCAN - Density-Based Spatial Clustering of Applications with Noise](https://en.wikipedia.org/wiki/DBSCAN). Given a large set of data points in a space of arbitrary dimension and given a distance metric, this algorithm can discover clusters of different shapes and sizes, marking as outliers isolated points in low-density regions (i.e. points whose nearest neighbours are too far away).
 
 
 ## Clustering
@@ -12,13 +12,20 @@ Clustering is done with the [DBSCAN algorithm](https://en.wikipedia.org/wiki/DBS
 ## Implementation
 The project is implemented in four programming languages and paradigms where each implementation is specific to the language and paradigm's purpose: 
   - [Objected-oriented (Java)](Java)
-    - DBSCAN algorithm is fully implemented and runs procedurally on the dataset
+    - The DBSCAN algorithm is fully implemented and clusters the dataset procedurally (dataset contains 21,232 points)
+    - This OOP version gives a general overview of the project before proceeding to the next version
   - [Concurrent (Golang)](Golang)
-    - DBSCAN algorithm runs concurrently on partitions of the dataset using the producer-consumer and thread pool pattern
+    - Partition the dataset then run DBSCAN concurrently on each partition using the producer-consumer pattern and thread pools
+    - This version splits the dataset into smaller partitions and clusters each partition concurrently
+    - Utilizes the maximum CPU capacity in order to cluster large datasets faster (dataset contains 232,051 points)
   - [Logical (Prolog)](Prolog)
-    - Performs the merging step of the MapReduce pattern on cluster partitions produced by the concurrent version declaratively
+    - This version merges the clustered dataset from each partition (includes removing overlapping points) using the MapReduce pattern
+    - Programmed declaratively and logically; mainly involves tail-recursion
+<!--     - Performs the merging step of the MapReduce pattern on cluster partitions produced by the concurrent version -->
   - [Functional (Scheme)](Scheme)
-    - Performs the merging step of the MapReduce pattern on cluster partitions produced by the concurrent version functionally
+    - This version merges the clustered dataset from each partition (includes removing overlapping points) using the MapReduce pattern
+    - Programmed functionally; mainly involves tail-recursion
+<!--     - Performs the merging step of the MapReduce pattern on cluster partitions produced by the concurrent version -->
 <!-- Example of full path (https://github.com/kienmarkdo/Taxi-Geolocation-Clustering-DBSCAN/tree/main/Java) -->
 
 <!-- NOTE: HTML Scroll Box doesn't work in GitHub markdown so <details> and <summary> are used instead. -->
