@@ -35,7 +35,7 @@ If we were to create partitions on the entire city of New York, one or two parti
 ## Dataset
 The dataset is taken from NYC's 2009 taxi database that recorded taxi trips in the span of **12 hours** (from 9h to 21h) on January 15, 2009. The dataset is contained in a CSV file, with each line corresponding to a trip record and the columns representing the relevant attributes of each trip, and contains _232,051_ points.
 
-_Note: This dataset cannot be plotted on Google Maps due to the sheer size of the CSV file._
+_Note: This dataset cannot be plotted on Google Maps due to the sheer size of the CSV file (contains 232,051 points)._
 
 ![image](https://user-images.githubusercontent.com/67518620/156251067-9c223a05-01fe-4051-a189-fbc458548c08.png)
 
